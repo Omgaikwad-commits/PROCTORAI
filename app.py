@@ -12,20 +12,25 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "exam-proctoring-default-dev-secret-key")
 
 # ================= DATABASE CONFIGURATION =================
-DATABASE_URL = os.environ.get("DATABASE_URL")
+DATABASE_URL = (
+    os.environ.get("DATABASE_URL")
+    or os.environ.get("MYSQL_URL")
+    or os.environ.get("MYSQL_PRIVATE_URL")
+)
+
 if DATABASE_URL:
     parsed = urllib.parse.urlparse(DATABASE_URL)
     DB_HOST = parsed.hostname or "localhost"
     DB_USER = parsed.username or "root"
-    DB_PASSWORD = parsed.password or ""
+    DB_PASSWORD = urllib.parse.unquote(parsed.password or "")
     DB_NAME = parsed.path.lstrip("/") if parsed.path else "exam_proctoring"
     DB_PORT = parsed.port or 3306
 else:
-    DB_HOST = os.environ.get("DB_HOST", "localhost")
-    DB_USER = os.environ.get("DB_USER", "root")
-    DB_PASSWORD = os.environ.get("DB_PASSWORD", "root123")
-    DB_NAME = os.environ.get("DB_NAME", "exam_proctoring")
-    DB_PORT = int(os.environ.get("DB_PORT", 3306))
+    DB_HOST = os.environ.get("DB_HOST") or os.environ.get("MYSQLHOST", "localhost")
+    DB_USER = os.environ.get("DB_USER") or os.environ.get("MYSQLUSER", "root")
+    DB_PASSWORD = os.environ.get("DB_PASSWORD") or os.environ.get("MYSQLPASSWORD", "root123")
+    DB_NAME = os.environ.get("DB_NAME") or os.environ.get("MYSQLDATABASE", "exam_proctoring")
+    DB_PORT = int(os.environ.get("DB_PORT") or os.environ.get("MYSQLPORT", 3306))
 
 DB_SSL = os.environ.get("DB_SSL", "false").lower() in ("true", "1", "yes")
 
@@ -45,7 +50,7 @@ def get_db():
     return pymysql.connect(**conn_kwargs)
 
 def init_db():
-    # Ensure MySQL database exists (useful for local and new deployments)
+    # Attempt to create database if permitted (e.g. root local MySQL)
     try:
         server_conn_kwargs = {
             "host": DB_HOST,
@@ -62,7 +67,7 @@ def init_db():
             s_cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{DB_NAME}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
         server_conn.close()
     except Exception as e:
-        print(f"Database check warning (may already exist or managed user): {e}")
+        pass  # In managed cloud MySQL, the database is pre-created and user may not have CREATE DATABASE privilege
 
     try:
         conn = get_db()
