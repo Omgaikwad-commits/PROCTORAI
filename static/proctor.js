@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!proctorToast) return;
         clearTimeout(toastTimeout);
 
-        proctorToast.innerHTML = `<strong>⚠️ Warning:</strong> ${message}`;
+        proctorToast.innerHTML = `<strong>Warning:</strong> ${message}`;
         proctorToast.className = isDanger ? "proctor-toast toast-danger" : "proctor-toast toast-warn";
         proctorToast.classList.remove("hidden");
 
@@ -134,11 +134,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (warnings >= MAX_WARNINGS) {
-            terminateExam(`🚫 Exam terminated! Maximum allowed warnings (${MAX_WARNINGS}) reached.`);
+            terminateExam(`Exam terminated! Maximum allowed warnings (${MAX_WARNINGS}) reached.`);
         } else {
             // Non-blocking browser alert
             setTimeout(() => {
-                alert(`⚠️ Warning #${warnings} / ${MAX_WARNINGS}!\n${reason}\n\nExceeding ${MAX_WARNINGS} warnings will auto-terminate your exam.`);
+                alert(`Warning #${warnings} / ${MAX_WARNINGS}!\n${reason}\n\nExceeding ${MAX_WARNINGS} warnings will auto-terminate your exam.`);
             }, 50);
         }
     }
@@ -310,7 +310,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 };
 
                 if (hudMobileText) {
-                    hudMobileText.textContent = "🚨 DETECTED!";
+                    hudMobileText.textContent = "DETECTED";
                     hudMobileText.className = "hud-status status-danger";
                 }
 
@@ -321,7 +321,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const elapsed = Date.now() - mobileDetectedStartTime;
                 if (elapsed >= MOBILE_SUSTAINED_MS && !mobileCooldown) {
                     mobileCooldown = true;
-                    giveWarning("📱 Mobile phone detected in camera view! Mobile devices are strictly prohibited.", "mobile");
+                    giveWarning("Mobile phone detected in camera view! Mobile devices are strictly prohibited.", "mobile");
                     setTimeout(() => {
                         mobileCooldown = false;
                     }, MOBILE_COOLDOWN_MS);
@@ -332,7 +332,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 mobileDetectedStartTime = null;
 
                 if (hudMobileText && !isTerminated) {
-                    hudMobileText.textContent = "🟢 None";
+                    hudMobileText.textContent = "None";
                     hudMobileText.className = "hud-status status-ok";
                 }
             }
@@ -367,7 +367,7 @@ document.addEventListener("DOMContentLoaded", function () {
             currentGazeState = "No Face";
 
             if (hudFaceText) {
-                hudFaceText.textContent = "❌ No Face";
+                hudFaceText.textContent = "No Face";
                 hudFaceText.className = "hud-status status-danger";
             }
             if (hudEyeText) {
@@ -381,7 +381,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const elapsed = Date.now() - noFaceStartTime;
             if (elapsed > NO_FACE_LIMIT) {
-                terminateExam("🚫 No face detected in camera view for over 5 seconds. Exam terminated.");
+                terminateExam("No face detected in camera view for over 5 seconds. Exam terminated.");
             }
 
             drawOverlay();
@@ -397,7 +397,7 @@ document.addEventListener("DOMContentLoaded", function () {
             currentGazeState = "Multiple Faces";
 
             if (hudFaceText) {
-                hudFaceText.textContent = "⚠️ Multi Faces";
+                hudFaceText.textContent = "Multiple Faces";
                 hudFaceText.className = "hud-status status-danger";
             }
             if (hudEyeText) {
@@ -407,7 +407,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (!multiFaceCooldown) {
                 multiFaceCooldown = true;
-                giveWarning("👥 Multiple faces detected! Only the registered student is allowed in the frame.", "face");
+                giveWarning("Multiple faces detected! Only the registered student is allowed in the frame.", "face");
                 setTimeout(() => {
                     multiFaceCooldown = false;
                 }, 5000);
@@ -488,7 +488,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Check if looking away persistently
         if (gaze !== "Focused") {
             if (hudEyeText) {
-                hudEyeText.textContent = `⚠️ ${gaze}`;
+                hudEyeText.textContent = `${gaze}`;
                 hudEyeText.className = "hud-status status-danger";
             }
 
@@ -499,7 +499,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const elapsed = Date.now() - lookingAwayStartTime;
             if (elapsed >= LOOKING_AWAY_LIMIT && !eyeCooldown) {
                 eyeCooldown = true;
-                giveWarning(`👁️ Eye gaze diverted! Student is ${reason}. Please look directly at the exam screen!`, "eye");
+                giveWarning(`Eye gaze diverted! Student is ${reason}. Please look directly at the exam screen!`, "eye");
                 setTimeout(() => {
                     eyeCooldown = false;
                 }, EYE_COOLDOWN_MS);
@@ -510,7 +510,7 @@ document.addEventListener("DOMContentLoaded", function () {
             lookingAwayStartTime = null;
 
             if (hudEyeText && !isTerminated) {
-                hudEyeText.textContent = "🟢 Focused";
+                hudEyeText.textContent = "Focused";
                 hudEyeText.className = "hud-status status-ok";
             }
         }
@@ -562,7 +562,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ctx.stroke();
 
             // Label tag badge
-            const labelText = `📱 CELL PHONE (${scorePercent}%)`;
+            const labelText = `CELL PHONE (${scorePercent}%)`;
             ctx.font = "bold 13px 'Poppins', sans-serif";
             const textWidth = ctx.measureText(labelText).width;
 

@@ -1,58 +1,147 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Student Registration</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration - ProctorAI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<div class="login-container">
-
-    <div class="login-card register-card">
-        <h2>🎓 Student Registration</h2>
-
-        {% if error %}
-        <div class="alert-error">
-            ⚠️ {{ error }}
+    <!-- Professional App Navigation -->
+    <header class="app-navbar">
+        <a href="/" class="brand-logo">
+            <div class="brand-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <path d="m9 12 2 2 4-4"></path>
+                </svg>
+            </div>
+            <span>PROCTOR<span style="color: var(--primary-light);">AI</span></span>
+        </a>
+        <div class="nav-right">
+            <a href="/" class="subtle-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Return to Portal Selection
+            </a>
         </div>
-        {% endif %}
+    </header>
 
-        <form method="POST">
-
-            <div class="input-group">
-                <input type="text" name="name" placeholder="Enter Full Name" required autofocus>
+    <main class="login-container">
+        <div class="login-card register-card">
+            
+            <div class="card-header-area">
+                <div class="card-header-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                </div>
+                <h2>Candidate Registration</h2>
+                <p>Register your student profile for online proctored examinations</p>
             </div>
 
-            <div class="input-group">
-                <input type="text" name="department" placeholder="Enter Department (e.g. Computer Engineering)" required>
+            {% if error %}
+            <div class="alert-error">
+                <svg class="alert-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>{{ error }}</span>
             </div>
+            {% endif %}
 
-            <div class="input-group">
-                <input type="text" name="class" placeholder="Enter Class / Division (e.g. TE-A, BE-B)" required>
-            </div>
+            <form method="POST">
+                
+                <div class="form-group">
+                    <label class="input-label" for="cand-name">Student Full Name</label>
+                    <div class="input-field-wrapper">
+                        <div class="input-field-icon">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <input id="cand-name" type="text" name="name" placeholder="e.g. John Doe" required autofocus>
+                    </div>
+                </div>
 
-            <div class="input-group">
-                <input type="text" name="roll_no" placeholder="Enter Roll Number (e.g. D-04)" required>
-            </div>
+                <div class="form-group">
+                    <label class="input-label" for="cand-dept">Department</label>
+                    <div class="input-field-wrapper">
+                        <div class="input-field-icon">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                            </svg>
+                        </div>
+                        <input id="cand-dept" type="text" name="department" placeholder="e.g. Information Technology" required>
+                    </div>
+                </div>
 
-            <div class="input-group">
-                <input type="password" name="password" placeholder="Create Password" required minlength="4">
-            </div>
+                <div class="form-group">
+                    <label class="input-label" for="cand-class">Class / Division</label>
+                    <div class="input-field-wrapper">
+                        <div class="input-field-icon">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <input id="cand-class" type="text" name="class" placeholder="e.g. TE-Computer (Div A)" required>
+                    </div>
+                </div>
 
-            <button type="submit" class="modern-btn">
-                Register as Student
-            </button>
+                <div class="form-group">
+                    <label class="input-label" for="cand-roll">Roll Number (Unique ID)</label>
+                    <div class="input-field-wrapper">
+                        <div class="input-field-icon">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                                <line x1="7" y1="8" x2="17" y2="8"></line>
+                                <line x1="7" y1="12" x2="17" y2="12"></line>
+                            </svg>
+                        </div>
+                        <input id="cand-roll" type="text" name="roll_no" placeholder="e.g. D-04" required>
+                    </div>
+                </div>
 
-            <div class="form-footer">
-                <p>Already registered? <a href="/student">Login here</a></p>
-                <p style="margin-top: 10px;"><a href="/" class="subtle-link">⬅ Back to Home</a></p>
-            </div>
+                <div class="form-group">
+                    <label class="input-label" for="cand-password">Password</label>
+                    <div class="input-field-wrapper">
+                        <div class="input-field-icon">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </div>
+                        <input id="cand-password" type="password" name="password" placeholder="Create a password (min 4 chars)" required minlength="4">
+                    </div>
+                </div>
 
-        </form>
+                <button type="submit" class="modern-btn" style="margin-top: 8px;">
+                    <span>Register Student Profile</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
 
-    </div>
+                <div class="form-footer">
+                    <p>Already registered? <a href="/student">Sign in to exam</a></p>
+                </div>
 
-</div>
+            </form>
+
+        </div>
+    </main>
 
 </body>
 </html>

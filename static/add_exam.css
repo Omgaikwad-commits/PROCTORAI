@@ -1,151 +1,98 @@
-/* ================= BACKGROUND ================= */
+/* ===================================================
+   PROCTORAI - ADD EXAM QUESTION STYLES
+   =================================================== */
 
-body {
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
-    min-height: 100vh;
-    background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1e3c72);
-    background-size: 400% 400%;
-    animation: gradientBG 12s ease infinite;
+@import url('style.css');
+
+.form-wrapper {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.add-question-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 40px 44px;
+    box-shadow: var(--shadow-card);
+}
+
+.form-header {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-}
-
-/* Animated Gradient */
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* ================= GLASS CARD ================= */
-
-.form-container {
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(18px);
-    border-radius: 25px;
-    width: 95%;
-    max-width: 750px;
-    padding: 45px;
-    box-shadow: 0 25px 60px rgba(0,0,0,0.4);
-    border: 1px solid rgba(255,255,255,0.2);
-    text-align: center;
-    transition: 0.4s ease;
-}
-
-.form-container:hover {
-    transform: translateY(-6px);
-}
-
-.form-container h1 {
     margin-bottom: 30px;
-    color: white;
-    font-weight: 600;
-    font-size: 28px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border-color);
 }
 
-/* ================= TEXTAREA ================= */
+.form-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.question-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
 
 .question-form textarea {
     width: 100%;
-    height: 110px;
-    padding: 15px;
-    border-radius: 12px;
-    border: none;
-    margin-bottom: 25px;
-    font-size: 15px;
-    resize: none;
-    background: rgba(255,255,255,0.2);
-    color: white;
-    transition: 0.3s;
-}
-
-.question-form textarea::placeholder {
-    color: #eee;
+    min-height: 120px;
+    padding: 14px 16px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-main);
+    font-size: 14.5px;
+    font-family: inherit;
+    resize: vertical;
+    transition: var(--transition);
 }
 
 .question-form textarea:focus {
-    background: rgba(255,255,255,0.3);
-    box-shadow: 0 0 12px rgba(255,255,255,0.4);
     outline: none;
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-focus);
+    background: rgba(15, 23, 42, 0.95);
 }
-
-/* ================= OPTIONS GRID ================= */
 
 .options-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    margin-bottom: 25px;
+    gap: 16px;
 }
 
-.options-grid input,
-.question-form input[type="text"] {
-    padding: 14px;
-    border-radius: 12px;
-    border: none;
-    font-size: 14px;
-    background: rgba(255,255,255,0.2);
-    color: white;
-    transition: 0.3s;
-}
-
-.options-grid input::placeholder,
-.question-form input::placeholder {
-    color: #eee;
-}
-
-.options-grid input:focus,
-.question-form input:focus {
-    background: rgba(255,255,255,0.3);
-    box-shadow: 0 0 10px rgba(255,255,255,0.4);
-    outline: none;
-}
-
-/* ================= SUBMIT BUTTON ================= */
-
-.submit-btn {
-    width: 100%;
-    padding: 15px;
-    border: none;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #00c6ff, #0072ff);
-    color: white;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.3s ease;
-}
-
-.submit-btn:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 25px rgba(0, 114, 255, 0.5);
-}
-
-/* ================= BACK BUTTON ================= */
-
-.back-btn {
-    display: inline-block;
-    margin-top: 25px;
-    text-decoration: none;
-    color: #ddd;
-    font-weight: 500;
-    transition: 0.3s;
-}
-
-.back-btn:hover {
-    color: #00c6ff;
-}
-
-/* ================= RESPONSIVE ================= */
-
-@media (max-width: 600px) {
-    .form-container {
-        padding: 30px;
-    }
-
+@media (max-width: 640px) {
     .options-grid {
         grid-template-columns: 1fr;
     }
+}
+
+.option-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.option-badge {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary-light);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+}
+
+.form-actions .modern-btn {
+    flex: 1;
 }

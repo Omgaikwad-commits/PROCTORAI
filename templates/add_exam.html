@@ -1,34 +1,107 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Add Exam Question</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Exam Question - ProctorAI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='add_exam.css') }}">
 </head>
 <body>
 
-<div class="form-container">
-
-    <h1>📝 Add Exam Question</h1>
-
-    <form method="POST" class="question-form">
-
-        <textarea name="question" placeholder="Enter Question" required></textarea>
-
-        <div class="options-grid">
-            <input type="text" name="option1" placeholder="Option 1" required>
-            <input type="text" name="option2" placeholder="Option 2" required>
-            <input type="text" name="option3" placeholder="Option 3" required>
-            <input type="text" name="option4" placeholder="Option 4" required>
+    <!-- Professional App Navigation -->
+    <header class="app-navbar">
+        <a href="/teacher_dashboard" class="brand-logo">
+            <div class="brand-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <path d="m9 12 2 2 4-4"></path>
+                </svg>
+            </div>
+            <span>PROCTOR<span style="color: var(--primary-light);">AI</span></span>
+            <span class="brand-tag">Question Editor</span>
+        </a>
+        <div class="nav-right">
+            <a href="{{ url_for('teacher_dashboard') }}" class="subtle-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to Dashboard
+            </a>
         </div>
+    </header>
 
-        <input type="text" name="answer" placeholder="Correct Answer (exact option text)" required>
+    <div class="form-wrapper">
+        <div class="add-question-card">
+            
+            <div class="form-header">
+                <div>
+                    <h1>New Assessment Question</h1>
+                    <p style="color: var(--text-muted); font-size: 13.5px; margin-top: 4px;">
+                        Subject: <strong>{{ session.get('subject', 'General') }}</strong>
+                    </p>
+                </div>
+            </div>
 
-        <button type="submit" class="submit-btn">➕ Add Question</button>
-    </form>
+            <form method="POST" class="question-form">
+                
+                <div class="form-group">
+                    <label class="input-label" for="exam-q">Question Stem / Prompt</label>
+                    <textarea id="exam-q" name="question" placeholder="Type the question prompt clearly here..." required></textarea>
+                </div>
 
-    <a href="{{ url_for('teacher_dashboard') }}" class="back-btn">⬅ Back to Dashboard</a>
+                <div class="options-grid">
+                    <div class="option-input-group">
+                        <span class="option-badge">Option A</span>
+                        <input type="text" name="option1" placeholder="Choice A description" required>
+                    </div>
 
-</div>
+                    <div class="option-input-group">
+                        <span class="option-badge">Option B</span>
+                        <input type="text" name="option2" placeholder="Choice B description" required>
+                    </div>
+
+                    <div class="option-input-group">
+                        <span class="option-badge">Option C</span>
+                        <input type="text" name="option3" placeholder="Choice C description" required>
+                    </div>
+
+                    <div class="option-input-group">
+                        <span class="option-badge">Option D</span>
+                        <input type="text" name="option4" placeholder="Choice D description" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="input-label" for="exam-ans">Correct Key (Exact Option Text)</label>
+                    <div class="input-field-wrapper">
+                        <div class="input-field-icon">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                        </div>
+                        <input id="exam-ans" type="text" name="answer" placeholder="Enter the exact text corresponding to the correct answer" required>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="modern-btn">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>Publish Question</span>
+                    </button>
+                    <a href="{{ url_for('teacher_dashboard') }}" class="modern-btn secondary-btn" style="max-width: 140px;">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
 
 </body>
 </html>

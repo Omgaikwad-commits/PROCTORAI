@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Online Exam</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject }} Examination - ProctorAI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
     <!-- TensorFlow.js & COCO-SSD for Mobile / Cell Phone Detection -->
@@ -14,134 +16,212 @@
 
     <script src="{{ url_for('static', filename='proctor.js') }}" defer></script>
 </head>
-<body>
+<body style="background-color: var(--bg-main);">
 
-<!-- 🔥 FIXED TIMER (Always Visible) -->
-<div class="fixed-timer">
-    ⏳ Time Remaining: 
-    <span id="timer">30:00</span>
-</div>
-
-<div class="exam-wrapper">
-
-    <div class="exam-container">
-
-        <h1 class="exam-title">
-            {{ subject }} Exam
-        </h1>
-
-        <!-- PROCTOR MONITORING BOX -->
-        <div class="facecam-box">
-            <div class="video-container">
-                <video id="webcam" autoplay playsinline muted></video>
-                <canvas id="proctor-canvas"></canvas>
+    <!-- Exam Navigation & Status Bar -->
+    <header class="exam-navbar">
+        <div class="exam-subject-badge">
+            <div class="brand-icon-box" style="width: 32px; height: 32px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <path d="m9 12 2 2 4-4"></path>
+                </svg>
             </div>
-            
-            <!-- Real-time HUD Status Indicators -->
-            <div class="proctor-hud">
-                <div class="hud-item" id="hud-face">
-                    <span class="hud-icon">👤</span>
-                    <span class="hud-label">Face:</span>
-                    <span class="hud-status status-loading" id="hud-face-text">Loading...</span>
-                </div>
-                <div class="hud-item" id="hud-eye">
-                    <span class="hud-icon">👁️</span>
-                    <span class="hud-label">Eye Gaze:</span>
-                    <span class="hud-status status-loading" id="hud-eye-text">Loading...</span>
-                </div>
-                <div class="hud-item" id="hud-mobile">
-                    <span class="hud-icon">📱</span>
-                    <span class="hud-label">Mobile:</span>
-                    <span class="hud-status status-loading" id="hud-mobile-text">Loading...</span>
-                </div>
-                <div class="hud-item hud-warnings" id="hud-warnings-badge">
-                    <span class="hud-icon">⚠️</span>
-                    <span class="hud-label">Warnings:</span>
-                    <span class="hud-status status-warning-count" id="hud-warning-count">0 / 3</span>
-                </div>
-            </div>
-
-            <!-- Toast / Alert Notification Container -->
-            <div id="proctor-toast" class="proctor-toast hidden"></div>
+            <span>{{ subject }} Examination</span>
         </div>
 
-        <form method="POST">
+        <div class="fixed-timer" id="timerBox">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Time Remaining:</span>
+            <span id="timer" style="font-weight: 700;">30:00</span>
+        </div>
+    </header>
 
-            <input type="hidden" id="warnings" name="warnings" value="0">
-            <input type="hidden" id="mobile_warnings" name="mobile_warnings" value="0">
-            <input type="hidden" id="eye_warnings" name="eye_warnings" value="0">
-            <input type="hidden" id="tab_warnings" name="tab_warnings" value="0">
-            <input type="hidden" id="face_warnings" name="face_warnings" value="0">
+    <!-- Main Exam Workspace Layout -->
+    <div class="exam-layout">
+        
+        <!-- Left: Questions Stream -->
+        <main class="exam-questions-column">
+            
+            <form method="POST" id="examForm">
+                
+                <!-- Proctoring Violation Hidden Inputs -->
+                <input type="hidden" id="warnings" name="warnings" value="0">
+                <input type="hidden" id="mobile_warnings" name="mobile_warnings" value="0">
+                <input type="hidden" id="eye_warnings" name="eye_warnings" value="0">
+                <input type="hidden" id="tab_warnings" name="tab_warnings" value="0">
+                <input type="hidden" id="face_warnings" name="face_warnings" value="0">
 
-            {% for q in questions %}
-            <div class="question-card">
-                <h3>{{ loop.index }}. {{ q[3] }}</h3>
+                {% if questions %}
+                    {% for q in questions %}
+                    <div class="question-card" style="margin-bottom: 20px;">
+                        <div class="question-title">
+                            <span class="question-num-pill">Q{{ loop.index }}</span>
+                            <span>{{ q[3] }}</span>
+                        </div>
 
-                <label class="option">
-                    <input type="radio" name="{{ q[0] }}" value="{{ q[4] }}" required>
-                    <span>A) {{ q[4] }}</span>
-                </label>
+                        <div class="options-list">
+                            <label class="option-label">
+                                <input type="radio" name="{{ q[0] }}" value="{{ q[4] }}" required>
+                                <span><strong>A)</strong> {{ q[4] }}</span>
+                            </label>
 
-                <label class="option">
-                    <input type="radio" name="{{ q[0] }}" value="{{ q[5] }}">
-                    <span>B) {{ q[5] }}</span>
-                </label>
+                            <label class="option-label">
+                                <input type="radio" name="{{ q[0] }}" value="{{ q[5] }}">
+                                <span><strong>B)</strong> {{ q[5] }}</span>
+                            </label>
 
-                <label class="option">
-                    <input type="radio" name="{{ q[0] }}" value="{{ q[6] }}">
-                    <span>C) {{ q[6] }}</span>
-                </label>
+                            <label class="option-label">
+                                <input type="radio" name="{{ q[0] }}" value="{{ q[6] }}">
+                                <span><strong>C)</strong> {{ q[6] }}</span>
+                            </label>
 
-                <label class="option">
-                    <input type="radio" name="{{ q[0] }}" value="{{ q[7] }}">
-                    <span>D) {{ q[7] }}</span>
-                </label>
+                            <label class="option-label">
+                                <input type="radio" name="{{ q[0] }}" value="{{ q[7] }}">
+                                <span><strong>D)</strong> {{ q[7] }}</span>
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <button type="submit" class="submit-btn" style="padding: 16px; font-size: 15px; margin-top: 10px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Submit Examination</span>
+                    </button>
+                {% else %}
+                    <div class="question-card" style="text-align: center; padding: 48px 24px;">
+                        <h3>No questions currently configured for this exam subject.</h3>
+                        <p style="color: var(--text-muted); margin-top: 8px;">Please contact your instructor or administrator.</p>
+                    </div>
+                {% endif %}
+
+            </form>
+
+        </main>
+
+        <!-- Right: Real-Time AI Proctoring Telemetry Sidebar -->
+        <aside class="proctor-sidebar">
+            <div class="proctor-card">
+                
+                <div class="proctor-card-header">
+                    <span class="proctor-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                        Live AI Monitor
+                    </span>
+                    <span class="live-badge">
+                        <span class="live-beacon"></span>
+                        Active
+                    </span>
+                </div>
+
+                <!-- Video + Canvas Detection Layer -->
+                <div class="video-box video-container">
+                    <video id="webcam" autoplay playsinline muted></video>
+                    <canvas id="proctor-canvas"></canvas>
+                </div>
+
+                <!-- Telemetry HUD -->
+                <div class="proctor-hud">
+                    <div class="hud-item" id="hud-face">
+                        <div class="hud-label-group">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <span>Candidate Face</span>
+                        </div>
+                        <span class="hud-status-badge status-loading" id="hud-face-text">Initializing...</span>
+                    </div>
+
+                    <div class="hud-item" id="hud-eye">
+                        <div class="hud-label-group">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <span>Gaze Focus</span>
+                        </div>
+                        <span class="hud-status-badge status-loading" id="hud-eye-text">Tracking...</span>
+                    </div>
+
+                    <div class="hud-item" id="hud-mobile">
+                        <div class="hud-label-group">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                            </svg>
+                            <span>Mobile Device</span>
+                        </div>
+                        <span class="hud-status-badge status-loading" id="hud-mobile-text">Scanning...</span>
+                    </div>
+
+                    <div class="hud-item hud-warnings" id="hud-warnings-badge">
+                        <div class="hud-label-group">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            <span style="font-weight: 600;">Total Warnings</span>
+                        </div>
+                        <span class="hud-status-badge status-warning-count" id="hud-warning-count">0 / 3</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 14px; padding: 10px 12px; background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border-color); border-radius: 6px; font-size: 11.5px; color: var(--text-dim); line-height: 1.5;">
+                    Stay facing forward. Gaze diversion, mobile devices, tab switches, and multiple faces trigger automated warnings.
+                </div>
 
             </div>
-            {% endfor %}
-
-            <button type="submit" class="submit-btn">
-                Submit Exam
-            </button>
-
-        </form>
+        </aside>
 
     </div>
 
-</div>
+    <!-- Alert / Toast Container -->
+    <div id="proctor-toast" class="proctor-toast hidden"></div>
 
-<script>
-    // ===== TIMER SETTINGS =====
-    let totalTime = 30 * 60; // 30 minutes
-    const timerElement = document.getElementById("timer");
-    const examForm = document.querySelector("form");
+    <!-- Countdown Timer Script -->
+    <script>
+        let totalTime = 30 * 60; // 30 minutes
+        const timerElement = document.getElementById("timer");
+        const timerBox = document.getElementById("timerBox");
+        const examForm = document.getElementById("examForm");
 
-    function updateTimer() {
-        let minutes = Math.floor(totalTime / 60);
-        let seconds = totalTime % 60;
+        function updateTimer() {
+            let minutes = Math.floor(totalTime / 60);
+            let seconds = totalTime % 60;
 
-        seconds = seconds < 10 ? "0" + seconds : seconds;
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
 
-        timerElement.textContent = minutes + ":" + seconds;
+            if (timerElement) {
+                timerElement.textContent = `${minutes}:${seconds}`;
+            }
 
-        // 🔥 Turn red when 1 minute left
-        if (totalTime <= 60) {
-            timerElement.style.color = "red";
-            timerElement.style.fontWeight = "bold";
+            if (totalTime <= 300 && timerBox) {
+                timerBox.classList.add("timer-urgent");
+            }
+
+            if (totalTime <= 0) {
+                clearInterval(timerInterval);
+                alert("Assessment time has expired! Submitting answers automatically.");
+                if (examForm) examForm.submit();
+            }
+
+            totalTime--;
         }
 
-        if (totalTime <= 0) {
-            clearInterval(timerInterval);
-            alert("⏰ Time is up! Exam will be submitted automatically.");
-            examForm.submit();
-        }
-
-        totalTime--;
-    }
-
-    updateTimer();
-    const timerInterval = setInterval(updateTimer, 1000);
-</script>
+        const timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+    </script>
 
 </body>
 </html>

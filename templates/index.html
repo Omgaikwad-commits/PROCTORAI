@@ -1,41 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AI Online Exam Proctoring System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProctorAI - Intelligent Online Exam Proctoring</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<div class="home-container">
-    <div class="home-card portal-card">
-        <h1>🛡️ AI Online Exam Proctoring System</h1>
-        <p class="home-subtitle">Secure, Real-time Monitored Assessment Platform</p>
-
-        <div class="portal-grid">
-            <!-- Teacher Portal -->
-            <div class="portal-box">
-                <div class="portal-icon">👩‍🏫</div>
-                <h3>Teacher Portal</h3>
-                <p>Manage questions, monitor student exams & view proctoring scorecards.</p>
-                <div class="portal-actions">
-                    <a href="/teacher" class="modern-btn btn-sm">Teacher Login</a>
-                    <a href="/teacher_register" class="modern-btn secondary-btn btn-sm">Register</a>
-                </div>
+    <!-- Professional App Navigation -->
+    <header class="app-navbar">
+        <a href="/" class="brand-logo">
+            <div class="brand-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <path d="m9 12 2 2 4-4"></path>
+                </svg>
             </div>
-
-            <!-- Student Portal -->
-            <div class="portal-box">
-                <div class="portal-icon">🎓</div>
-                <h3>Student Portal</h3>
-                <p>Take proctored exams with real-time AI face, eye & device monitoring.</p>
-                <div class="portal-actions">
-                    <a href="/student" class="modern-btn btn-sm">Student Login</a>
-                    <a href="/student_register" class="modern-btn secondary-btn btn-sm">Register</a>
-                </div>
+            <span>PROCTOR<span style="color: var(--primary-light);">AI</span></span>
+            <span class="brand-tag">Academic Suite</span>
+        </a>
+        <div class="nav-right">
+            <div class="nav-status">
+                <span class="status-dot"></span>
+                <span>Proctoring Core Active</span>
             </div>
         </div>
-    </div>
-</div>
+    </header>
+
+    <main class="page-container">
+        <div class="home-card portal-card">
+            
+            <div class="home-header">
+                <div class="badge-pill">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Real-Time Computer Vision Monitoring
+                </div>
+                <h1>Online Examination Integrity Platform</h1>
+                <p class="home-subtitle">
+                    Automated, high-fidelity browser proctoring with client-side iris gaze estimation, mobile phone detection, and tab switch monitoring.
+                </p>
+            </div>
+
+            <div class="portal-grid">
+                <!-- Educator / Teacher Portal -->
+                <div class="portal-box">
+                    <div class="portal-box-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+                            <path d="M6 6h10"></path>
+                            <path d="M6 10h10"></path>
+                        </svg>
+                    </div>
+                    <h3>Faculty & Educator Portal</h3>
+                    <p>Create and manage exam question banks, review student integrity scorecards, and audit detailed violation records.</p>
+                    <div class="portal-actions">
+                        <a href="/teacher" class="modern-btn btn-sm">Faculty Login</a>
+                        <a href="/teacher_register" class="modern-btn secondary-btn btn-sm">Register</a>
+                    </div>
+                </div>
+
+                <!-- Student Candidate Portal -->
+                <div class="portal-box">
+                    <div class="portal-box-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <h3>Student Portal</h3>
+                    <p>Access authorized assessments with real-time proctoring verification, instant warning telemetry, and secure answer submission.</p>
+                    <div class="portal-actions">
+                        <a href="/student" class="modern-btn btn-sm">Student Login</a>
+                        <a href="/student_register" class="modern-btn secondary-btn btn-sm">Register</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
 
 </body>
 </html>

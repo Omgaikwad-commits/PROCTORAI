@@ -1,94 +1,180 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Exam Result & Proctoring Summary</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Result & Integrity Audit - ProctorAI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='result.css') }}">
 </head>
 <body>
 
-<div class="result-container">
-    <h1>📊 Exam Result & Proctoring Report</h1>
+    <!-- Professional App Navigation -->
+    <header class="app-navbar">
+        <a href="/" class="brand-logo">
+            <div class="brand-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <path d="m9 12 2 2 4-4"></path>
+                </svg>
+            </div>
+            <span>PROCTOR<span style="color: var(--primary-light);">AI</span></span>
+            <span class="brand-tag">Candidate Report</span>
+        </a>
+    </header>
 
-    <div class="result-card">
-        <div class="score-section">
-            <span class="score-label">Your Final Score</span>
-            <div class="score-value"><strong>{{ score }}</strong> / {{ total }}</div>
-        </div>
+    <div class="result-wrapper">
+        <div class="result-card-container">
+            
+            <div class="result-header-banner">
+                <h1>Assessment & Proctoring Audit Report</h1>
+                <p>Official submission telemetry recorded and permanently stored in institution database.</p>
+            </div>
 
-        <div class="proctoring-summary">
-            <h3>🛡️ Proctoring Verification Summary</h3>
-            <div class="violation-stats">
-                <div class="vstat-item">
-                    <span class="vstat-icon">⚠️</span>
-                    <span class="vstat-title">Total Warnings</span>
-                    <span class="vstat-num {% if warnings >= 3 %}text-danger{% elif warnings > 0 %}text-warn{% else %}text-ok{% endif %}">
-                        {{ warnings }} / 3
-                    </span>
+            <!-- Score Display Section -->
+            <div class="score-display-card">
+                <span class="score-label-text">Final Achieved Score</span>
+                <div class="score-value-big">
+                    {{ score }} <span>/ {{ total }}</span>
                 </div>
-                <div class="vstat-item">
-                    <span class="vstat-icon">📱</span>
-                    <span class="vstat-title">Mobile Phone</span>
-                    <span class="vstat-num {% if mobile_warnings and mobile_warnings > 0 %}text-danger{% else %}text-ok{% endif %}">
-                        {{ mobile_warnings or 0 }}
-                    </span>
-                </div>
-                <div class="vstat-item">
-                    <span class="vstat-icon">👁️</span>
-                    <span class="vstat-title">Eye Gaze Away</span>
-                    <span class="vstat-num {% if eye_warnings and eye_warnings > 0 %}text-warn{% else %}text-ok{% endif %}">
-                        {{ eye_warnings or 0 }}
-                    </span>
-                </div>
-                <div class="vstat-item">
-                    <span class="vstat-icon">💻</span>
-                    <span class="vstat-title">Tab Switches</span>
-                    <span class="vstat-num {% if tab_warnings and tab_warnings > 0 %}text-danger{% else %}text-ok{% endif %}">
-                        {{ tab_warnings or 0 }}
-                    </span>
-                </div>
-                <div class="vstat-item">
-                    <span class="vstat-icon">👥</span>
-                    <span class="vstat-title">Multiple People</span>
-                    <span class="vstat-num {% if face_warnings and face_warnings > 0 %}text-danger{% else %}text-ok{% endif %}">
-                        {{ face_warnings or 0 }}
-                    </span>
+                <div style="font-size: 14px; color: var(--text-muted); font-weight: 500;">
+                    {% if total > 0 %}
+                        Performance: <strong>{{ ((score / total) * 100) | round(1) }}%</strong>
+                    {% else %}
+                        Assessment Completed
+                    {% endif %}
                 </div>
             </div>
 
-            {% if warnings > 0 %}
-            <div class="violation-breakdown-box">
-                <h4>Violation Log Details:</h4>
-                <ul>
-                    {% if tab_warnings and tab_warnings > 0 %}
-                    <li>💻 <strong>Tab Switching:</strong> {{ tab_warnings }} unauthorized window / tab switch event(s) detected.</li>
-                    {% endif %}
-                    {% if face_warnings and face_warnings > 0 %}
-                    <li>👥 <strong>Multiple Faces / People:</strong> {{ face_warnings }} instance(s) of multiple persons in camera frame.</li>
-                    {% endif %}
-                    {% if mobile_warnings and mobile_warnings > 0 %}
-                    <li>📱 <strong>Mobile Detection:</strong> {{ mobile_warnings }} instance(s) of mobile phone detected in camera view.</li>
-                    {% endif %}
-                    {% if eye_warnings and eye_warnings > 0 %}
-                    <li>👁️ <strong>Eye Gaze Diverted:</strong> {{ eye_warnings }} instance(s) of student looking away from exam screen.</li>
-                    {% endif %}
-                </ul>
-            </div>
-            {% endif %}
+            <!-- Integrity Audit Section -->
+            <div class="audit-section">
+                
+                <div class="audit-section-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            <path d="m9 12 2 2 4-4"></path>
+                        </svg>
+                        Proctoring Telemetry Audit
+                    </h2>
 
-            <div class="status-banner {% if warnings >= 3 %}banner-danger{% elif warnings > 0 %}banner-warn{% else %}banner-ok{% endif %}">
-                {% if warnings >= 3 %}
-                    🚫 Exam Disqualified / Auto-Terminated due to multiple violations!
-                {% elif warnings > 0 %}
-                    ⚠️ Exam submitted with {{ warnings }} warning(s). Recorded for teacher review.
-                {% else %}
-                    🟢 Clean Proctoring Record! No violations detected during the exam.
+                    {% if warnings == 0 %}
+                        <span class="verification-badge pill-success">
+                            Verified Clean (0 Flags)
+                        </span>
+                    {% elif warnings >= 3 %}
+                        <span class="verification-badge pill-danger">
+                            Limit Reached (Flagged)
+                        </span>
+                    {% else %}
+                        <span class="verification-badge pill-warning">
+                            Audited with Warnings ({{ warnings }})
+                        </span>
+                    {% endif %}
+                </div>
+
+                <!-- 5-Metric Breakdown Grid -->
+                <div class="vstats-grid">
+                    <div class="vstat-card">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-dim);">
+                            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <span class="vstat-card-label">Total Warnings</span>
+                        <span class="vstat-card-value {% if warnings >= 3 %}text-danger{% elif warnings > 0 %}text-warn{% else %}text-ok{% endif %}">
+                            {{ warnings }} / 3
+                        </span>
+                    </div>
+
+                    <div class="vstat-card">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-dim);">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                        </svg>
+                        <span class="vstat-card-label">Mobile Detected</span>
+                        <span class="vstat-card-value {% if mobile_warnings and mobile_warnings > 0 %}text-danger{% else %}text-ok{% endif %}">
+                            {{ mobile_warnings or 0 }}
+                        </span>
+                    </div>
+
+                    <div class="vstat-card">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-dim);">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        <span class="vstat-card-label">Gaze Averted</span>
+                        <span class="vstat-card-value {% if eye_warnings and eye_warnings > 0 %}text-warn{% else %}text-ok{% endif %}">
+                            {{ eye_warnings or 0 }}
+                        </span>
+                    </div>
+
+                    <div class="vstat-card">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-dim);">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                        <span class="vstat-card-label">Tab Switches</span>
+                        <span class="vstat-card-value {% if tab_warnings and tab_warnings > 0 %}text-danger{% else %}text-ok{% endif %}">
+                            {{ tab_warnings or 0 }}
+                        </span>
+                    </div>
+
+                    <div class="vstat-card">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-dim);">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <span class="vstat-card-label">Multi-Person</span>
+                        <span class="vstat-card-value {% if face_warnings and face_warnings > 0 %}text-danger{% else %}text-ok{% endif %}">
+                            {{ face_warnings or 0 }}
+                        </span>
+                    </div>
+                </div>
+
+                {% if warnings > 0 %}
+                <div class="violation-details-box">
+                    <h3>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        Violation Incident Summary
+                    </h3>
+                    <ul>
+                        {% if mobile_warnings and mobile_warnings > 0 %}
+                        <li>Cell phone or mobile device detected in student camera field of view ({{ mobile_warnings }} incident{{ 's' if mobile_warnings > 1 }}).</li>
+                        {% endif %}
+                        {% if eye_warnings and eye_warnings > 0 %}
+                        <li>Eye gaze or head rotation deviated away from the active assessment interface ({{ eye_warnings }} incident{{ 's' if eye_warnings > 1 }}).</li>
+                        {% endif %}
+                        {% if tab_warnings and tab_warnings > 0 %}
+                        <li>Browser tab or window blur/navigation event registered during test ({{ tab_warnings }} incident{{ 's' if tab_warnings > 1 }}).</li>
+                        {% endif %}
+                        {% if face_warnings and face_warnings > 0 %}
+                        <li>Multiple faces or unauthorized individuals detected in camera view ({{ face_warnings }} incident{{ 's' if face_warnings > 1 }}).</li>
+                        {% endif %}
+                    </ul>
+                </div>
                 {% endif %}
+
+                <div class="result-footer-actions">
+                    <a href="/" class="modern-btn">
+                        <span>Done / Exit Portal</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+                </div>
+
             </div>
+
         </div>
     </div>
-
-    <a href="/" class="home-btn">🏠 Return to Home</a>
-</div>
 
 </body>
 </html>
