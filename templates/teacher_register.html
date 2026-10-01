@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teacher Registration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="login-container">
+
+    <div class="login-card register-card">
+        <h2>👩‍🏫 Teacher Registration</h2>
+
+        {% if error %}
+        <div class="alert-error">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST">
+
+            <div class="input-group">
+                <input type="text" name="name" placeholder="Enter Full Name" required autofocus>
+            </div>
+
+            <div class="input-group">
+                <input type="text" name="department" placeholder="Enter Department (e.g. Computer Engineering)" required>
+            </div>
+
+            <div class="input-group">
+                <input type="text" name="subject" placeholder="Enter Subject Name (e.g. SEPM, Python)" required>
+            </div>
+
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Create Password" required minlength="4">
+            </div>
+
+            <button type="submit" class="modern-btn">
+                Register as Teacher
+            </button>
+
+            <div class="form-footer">
+                <p>Already have an account? <a href="/teacher">Login here</a></p>
+                <p style="margin-top: 10px;"><a href="/" class="subtle-link">⬅ Back to Home</a></p>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+
+</body>
+</html>

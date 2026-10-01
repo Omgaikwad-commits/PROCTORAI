@@ -9,21 +9,27 @@
 <div class="login-container">
 
     <div class="login-card">
-        <h2>Student Login</h2>
+        <h2>🎓 Student Login</h2>
+
+        {% if error %}
+        <div class="alert-error">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
+
+        {% if success %}
+        <div class="alert-success">
+            ✅ {{ success }}
+        </div>
+        {% endif %}
 
         <form method="POST">
 
             <div class="input-group">
-                <input type="text" name="student_name" 
-                       placeholder="Enter your name" required>
-            </div>
-            
-            <div class="input-group">
                 <input type="text" name="roll_no" 
-                    placeholder="Enter Roll Number" required>
+                       placeholder="Enter Roll Number (e.g. D-04)" required autofocus>
             </div>
 
-            <!-- ✅ NEW PASSWORD FIELD ADDED -->
             <div class="input-group">
                 <input type="password" name="password" 
                        placeholder="Enter Password" required>
@@ -32,7 +38,7 @@
             <!-- SUBJECT DROPDOWN -->
             <div class="input-group">
                 <select name="subject" required>
-                    <option value="">Select Subject</option>
+                    <option value="">Select Exam Subject</option>
                     {% for subject in subjects %}
                         <option value="{{ subject[0] }}">{{ subject[0] }}</option>
                     {% endfor %}
@@ -40,8 +46,13 @@
             </div>
 
             <button type="submit" class="modern-btn">
-                Start Exam
+                Login & Start Exam
             </button>
+
+            <div class="form-footer">
+                <p>New Student? <a href="/student_register">Register here</a></p>
+                <p style="margin-top: 10px;"><a href="/" class="subtle-link">⬅ Back to Home</a></p>
+            </div>
 
         </form>
 

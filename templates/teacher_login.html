@@ -9,19 +9,26 @@
 <div class="login-container">
 
     <div class="login-card">
-        <h2>Teacher Login</h2>
+        <h2>👩‍🏫 Teacher Login</h2>
+
+        {% if error %}
+        <div class="alert-error">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
+
+        {% if success %}
+        <div class="alert-success">
+            ✅ {{ success }}
+        </div>
+        {% endif %}
 
         <form method="POST">
 
             <div class="input-group">
-                <input type="text" name="name" placeholder="Enter Teacher Name" required>
+                <input type="text" name="name" placeholder="Enter Teacher Name" required autofocus>
             </div>
 
-            <div class="input-group">
-                <input type="text" name="subject" placeholder="Enter Subject Name" required>
-            </div>
-
-            <!-- ✅ NEW PASSWORD FIELD ADDED -->
             <div class="input-group">
                 <input type="password" name="password" placeholder="Enter Password" required>
             </div>
@@ -29,6 +36,11 @@
             <button type="submit" class="modern-btn">
                 Login
             </button>
+
+            <div class="form-footer">
+                <p>New Teacher? <a href="/teacher_register">Register here</a></p>
+                <p style="margin-top: 10px;"><a href="/" class="subtle-link">⬅ Back to Home</a></p>
+            </div>
 
         </form>
     </div>

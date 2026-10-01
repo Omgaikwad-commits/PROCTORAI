@@ -17,14 +17,17 @@ def init_db():
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT UNIQUE,
                     subject TEXT,
+                    department TEXT DEFAULT '',
                     password TEXT
                 )''')
 
-    # ✅ UPDATED (added roll_no)
+    # ✅ UPDATED (added roll_no, department, class)
     c.execute('''CREATE TABLE IF NOT EXISTS students(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT,
                     roll_no TEXT UNIQUE,
+                    department TEXT DEFAULT '',
+                    class TEXT DEFAULT '',
                     password TEXT
                 )''')
 
@@ -56,6 +59,18 @@ def init_db():
                 )''')
 
     # Safe schema migration for existing databases
+    c.execute("PRAGMA table_info(teachers)")
+    t_cols = [col[1] for col in c.fetchall()]
+    if "department" not in t_cols:
+        c.execute("ALTER TABLE teachers ADD COLUMN department TEXT DEFAULT ''")
+
+    c.execute("PRAGMA table_info(students)")
+    s_cols = [col[1] for col in c.fetchall()]
+    if "department" not in s_cols:
+        c.execute("ALTER TABLE students ADD COLUMN department TEXT DEFAULT ''")
+    if "class" not in s_cols:
+        c.execute("ALTER TABLE students ADD COLUMN class TEXT DEFAULT ''")
+
     c.execute("PRAGMA table_info(results)")
     columns = [col[1] for col in c.fetchall()]
     if "mobile_warnings" not in columns:
@@ -78,42 +93,60 @@ init_db()
 def index():
     return render_template("index.html")
 
-# ================= TEACHER LOGIN =================
+# ================= TEACHER AUTH =================
 
 @app.route("/teacher", methods=["GET", "POST"])
 def teacher():
     if request.method == "POST":
-        name = request.form["name"]
-        subject = request.form["subject"]
+        name = request.form["name"].strip()
         password = request.form["password"]
 
         conn = sqlite3.connect(DATABASE)
         c = conn.cursor()
 
-        c.execute("SELECT * FROM teachers WHERE name = ?", (name,))
-        teacher = c.fetchone()
+        c.execute("SELECT id, name, subject, department, password FROM teachers WHERE name = ?", (name,))
+        t = c.fetchone()
+        conn.close()
 
-        if teacher:
-            if check_password_hash(teacher[3], password):
-                session["teacher_name"] = name
-                session["subject"] = teacher[2]
-                conn.close()
-                return redirect("/teacher_dashboard")
-            else:
-                conn.close()
-                return "Invalid Password"
-        else:
-            hashed_password = generate_password_hash(password)
-            c.execute("INSERT INTO teachers(name, subject, password) VALUES (?,?,?)",
-                      (name, subject, hashed_password))
-            conn.commit()
-            conn.close()
-
-            session["teacher_name"] = name
-            session["subject"] = subject
+        if t and check_password_hash(t[4], password):
+            session["teacher_name"] = t[1]
+            session["subject"] = t[2]
+            session["department"] = t[3]
             return redirect("/teacher_dashboard")
+        else:
+            return render_template("teacher_login.html", error="Invalid teacher name or password.")
 
     return render_template("teacher_login.html")
+
+@app.route("/teacher_register", methods=["GET", "POST"])
+def teacher_register():
+    if request.method == "POST":
+        name = request.form["name"].strip()
+        subject = request.form["subject"].strip()
+        department = request.form["department"].strip()
+        password = request.form["password"]
+
+        conn = sqlite3.connect(DATABASE)
+        c = conn.cursor()
+
+        c.execute("SELECT id FROM teachers WHERE name = ?", (name,))
+        if c.fetchone():
+            conn.close()
+            return render_template("teacher_register.html", error="Teacher name already registered! Please login.")
+
+        hashed_password = generate_password_hash(password)
+        c.execute("""INSERT INTO teachers(name, subject, department, password)
+                     VALUES (?,?,?,?)""",
+                  (name, subject, department, hashed_password))
+        conn.commit()
+        conn.close()
+
+        session["teacher_name"] = name
+        session["subject"] = subject
+        session["department"] = department
+        return redirect("/teacher_dashboard")
+
+    return render_template("teacher_register.html")
 
 # ================= LOGOUT =================
 
@@ -233,6 +266,8 @@ def delete_result(result_id):
 
 # ================= STUDENT LOGIN =================
 
+# ================= STUDENT AUTH =================
+
 @app.route("/student", methods=["GET", "POST"])
 def student():
     conn = sqlite3.connect(DATABASE)
@@ -241,34 +276,68 @@ def student():
     c.execute("SELECT DISTINCT subject FROM exams")
     subjects = c.fetchall()
 
+    registered = request.args.get("registered")
+    success_msg = "Registration successful! Please login to take your exam." if registered else None
+
     if request.method == "POST":
-        name = request.form["student_name"]
-        roll_no = request.form["roll_no"]
+        roll_no = request.form["roll_no"].strip()
         password = request.form["password"]
-        subject = request.form["subject"]
+        subject = request.form.get("subject", "").strip()
 
-        c.execute("SELECT * FROM students WHERE roll_no = ?", (roll_no,))
-        student = c.fetchone()
+        if not subject:
+            conn.close()
+            return render_template("student_login.html", subjects=subjects, error="Please select an exam subject.")
 
-        if student:
-            if not check_password_hash(student[3], password):
-                conn.close()
-                return "Invalid Password"
-        else:
-            hashed_password = generate_password_hash(password)
-            c.execute("INSERT INTO students(name, roll_no, password) VALUES (?,?,?)",
-                      (name, roll_no, hashed_password))
-            conn.commit()
+        c.execute("SELECT id, name, roll_no, department, class, password FROM students WHERE roll_no = ?", (roll_no,))
+        student_row = c.fetchone()
 
-        session["student_name"] = name
-        session["roll_no"] = roll_no
+        if not student_row:
+            conn.close()
+            return render_template("student_login.html", subjects=subjects, error="Roll number not registered! Please register first.")
+
+        if not check_password_hash(student_row[5], password):
+            conn.close()
+            return render_template("student_login.html", subjects=subjects, error="Invalid password! Please try again.")
+
+        session["student_name"] = student_row[1]
+        session["roll_no"] = student_row[2]
+        session["department"] = student_row[3]
+        session["class"] = student_row[4]
         session["exam_subject"] = subject
 
         conn.close()
         return redirect("/exam")
 
     conn.close()
-    return render_template("student_login.html", subjects=subjects)
+    return render_template("student_login.html", subjects=subjects, success=success_msg)
+
+@app.route("/student_register", methods=["GET", "POST"])
+def student_register():
+    if request.method == "POST":
+        name = request.form["name"].strip()
+        department = request.form["department"].strip()
+        student_class = request.form["class"].strip()
+        roll_no = request.form["roll_no"].strip()
+        password = request.form["password"]
+
+        conn = sqlite3.connect(DATABASE)
+        c = conn.cursor()
+
+        c.execute("SELECT id FROM students WHERE roll_no = ?", (roll_no,))
+        if c.fetchone():
+            conn.close()
+            return render_template("student_register.html", error="Roll number already registered! Please login.")
+
+        hashed_password = generate_password_hash(password)
+        c.execute("""INSERT INTO students(name, roll_no, department, class, password)
+                     VALUES (?,?,?,?,?)""",
+                  (name, roll_no, department, student_class, hashed_password))
+        conn.commit()
+        conn.close()
+
+        return redirect("/student?registered=1")
+
+    return render_template("student_register.html")
 
 # ================= EXAM =================
 
