@@ -4,7 +4,12 @@
     <title>Online Exam</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
+    <!-- TensorFlow.js & COCO-SSD for Mobile / Cell Phone Detection -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3"></script>
+
+    <!-- MediaPipe Face Mesh & Camera Utils for Face Presence, Iris & Eye Gaze Tracking -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 
     <script src="{{ url_for('static', filename='proctor.js') }}" defer></script>
@@ -25,15 +30,46 @@
             {{ subject }} Exam
         </h1>
 
-        <!-- FACE CAM -->
+        <!-- PROCTOR MONITORING BOX -->
         <div class="facecam-box">
-            <video id="webcam" autoplay playsinline></video>
-            <p class="monitor-text">Live Monitoring</p>
+            <div class="video-container">
+                <video id="webcam" autoplay playsinline muted></video>
+                <canvas id="proctor-canvas"></canvas>
+            </div>
+            
+            <!-- Real-time HUD Status Indicators -->
+            <div class="proctor-hud">
+                <div class="hud-item" id="hud-face">
+                    <span class="hud-icon">👤</span>
+                    <span class="hud-label">Face:</span>
+                    <span class="hud-status status-loading" id="hud-face-text">Loading...</span>
+                </div>
+                <div class="hud-item" id="hud-eye">
+                    <span class="hud-icon">👁️</span>
+                    <span class="hud-label">Eye Gaze:</span>
+                    <span class="hud-status status-loading" id="hud-eye-text">Loading...</span>
+                </div>
+                <div class="hud-item" id="hud-mobile">
+                    <span class="hud-icon">📱</span>
+                    <span class="hud-label">Mobile:</span>
+                    <span class="hud-status status-loading" id="hud-mobile-text">Loading...</span>
+                </div>
+                <div class="hud-item hud-warnings" id="hud-warnings-badge">
+                    <span class="hud-icon">⚠️</span>
+                    <span class="hud-label">Warnings:</span>
+                    <span class="hud-status status-warning-count" id="hud-warning-count">0 / 3</span>
+                </div>
+            </div>
+
+            <!-- Toast / Alert Notification Container -->
+            <div id="proctor-toast" class="proctor-toast hidden"></div>
         </div>
 
         <form method="POST">
 
             <input type="hidden" id="warnings" name="warnings" value="0">
+            <input type="hidden" id="mobile_warnings" name="mobile_warnings" value="0">
+            <input type="hidden" id="eye_warnings" name="eye_warnings" value="0">
 
             {% for q in questions %}
             <div class="question-card">

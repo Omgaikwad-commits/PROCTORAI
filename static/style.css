@@ -174,23 +174,180 @@ body {
     font-size: 28px;
 }
 
-/* ================= FACE CAM ================= */
+/* ================= PROCTORING CAM & OVERLAY ================= */
 
 .facecam-box {
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin-bottom: 35px;
+    position: relative;
 }
 
-video {
-    width: 320px;
-    border-radius: 15px;
-    border: 3px solid rgba(255,255,255,0.4);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+.video-container {
+    position: relative;
+    width: 340px;
+    max-width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    background: #000;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.monitor-text {
-    margin-top: 10px;
+.video-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.video-container canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Flash Animations */
+.video-container.flash-warning {
+    border-color: #ff3366 !important;
+    box-shadow: 0 0 25px rgba(255, 51, 102, 0.9) !important;
+    animation: pulseWarning 0.4s ease-in-out 2;
+}
+
+@keyframes pulseWarning {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+}
+
+.video-container.flash-terminated {
+    border-color: #ff0000 !important;
+    box-shadow: 0 0 35px rgba(255, 0, 0, 1) !important;
+}
+
+/* ================= PROCTOR HUD ================= */
+
+.proctor-hud {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+    width: 100%;
+    max-width: 650px;
+}
+
+.hud-item {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
     color: #eee;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease;
+}
+
+.hud-icon {
+    font-size: 14px;
+}
+
+.hud-label {
+    font-weight: 500;
+    color: #aaa;
+}
+
+.hud-status {
+    font-weight: 600;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 10px;
+}
+
+.status-ok {
+    color: #00ff99;
+    background: rgba(0, 255, 153, 0.15);
+}
+
+.status-warn {
+    color: #ffcc00;
+    background: rgba(255, 204, 0, 0.18);
+}
+
+.status-danger {
+    color: #ff3366;
+    background: rgba(255, 51, 102, 0.2);
+    animation: blinkDanger 0.8s infinite alternate;
+}
+
+@keyframes blinkDanger {
+    from { opacity: 0.85; }
+    to { opacity: 1; text-shadow: 0 0 8px rgba(255, 51, 102, 0.8); }
+}
+
+.status-loading {
+    color: #00c6ff;
+    background: rgba(0, 198, 255, 0.15);
+}
+
+.status-muted {
+    color: #888;
+}
+
+.hud-warnings {
+    border-color: rgba(255, 170, 0, 0.4);
+}
+
+.status-warning-count {
+    color: #ffaa00;
+    font-weight: 700;
+}
+
+/* ================= TOAST ALERT ================= */
+
+.proctor-toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    padding: 14px 26px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    backdrop-filter: blur(12px);
+}
+
+.proctor-toast.hidden {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+    pointer-events: none;
+}
+
+.toast-danger {
+    background: rgba(220, 20, 60, 0.95);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.toast-warn {
+    background: rgba(230, 140, 0, 0.95);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 /* ================= QUESTIONS ================= */

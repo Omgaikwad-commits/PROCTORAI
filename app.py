@@ -40,7 +40,7 @@ def init_db():
                     answer TEXT
                 )''')
 
-    # ✅ UPDATED (added roll_no)
+    # ✅ UPDATED (added roll_no, mobile_warnings, eye_warnings)
     c.execute('''CREATE TABLE IF NOT EXISTS results(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     student_name TEXT,
@@ -48,8 +48,18 @@ def init_db():
                     teacher_name TEXT,
                     subject TEXT,
                     score INTEGER,
-                    warnings INTEGER
+                    warnings INTEGER,
+                    mobile_warnings INTEGER DEFAULT 0,
+                    eye_warnings INTEGER DEFAULT 0
                 )''')
+
+    # Safe schema migration for existing databases
+    c.execute("PRAGMA table_info(results)")
+    columns = [col[1] for col in c.fetchall()]
+    if "mobile_warnings" not in columns:
+        c.execute("ALTER TABLE results ADD COLUMN mobile_warnings INTEGER DEFAULT 0")
+    if "eye_warnings" not in columns:
+        c.execute("ALTER TABLE results ADD COLUMN eye_warnings INTEGER DEFAULT 0")
 
     conn.commit()
     conn.close()
@@ -184,7 +194,9 @@ def scorecard():
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
 
-    c.execute("SELECT * FROM results WHERE subject = ?",
+    c.execute("""SELECT id, student_name, roll_no, teacher_name, subject, score, warnings,
+                        COALESCE(mobile_warnings, 0), COALESCE(eye_warnings, 0)
+                 FROM results WHERE subject = ?""",
               (session["subject"],))
     data = c.fetchall()
 
@@ -268,6 +280,8 @@ def exam():
     if request.method == "POST":
         score = 0
         warnings = int(request.form.get("warnings") or 0)
+        mobile_warnings = int(request.form.get("mobile_warnings") or 0)
+        eye_warnings = int(request.form.get("eye_warnings") or 0)
 
         teacher_name = questions[0][1] if questions else ""
         subject = session["exam_subject"]
@@ -278,14 +292,16 @@ def exam():
                 score += 1
 
         c.execute("""INSERT INTO results(student_name, roll_no, teacher_name,
-                    subject, score, warnings)
-                    VALUES (?,?,?,?,?,?)""",
+                    subject, score, warnings, mobile_warnings, eye_warnings)
+                    VALUES (?,?,?,?,?,?,?,?)""",
                 (session["student_name"],
                  session["roll_no"],
                  teacher_name,
                  subject,
                  score,
-                 warnings))
+                 warnings,
+                 mobile_warnings,
+                 eye_warnings))
 
         conn.commit()
         conn.close()
@@ -293,7 +309,9 @@ def exam():
         return render_template("result.html",
                                score=score,
                                total=len(questions),
-                               warnings=warnings)
+                               warnings=warnings,
+                               mobile_warnings=mobile_warnings,
+                               eye_warnings=eye_warnings)
 
     conn.close()
     return render_template("exam.html",

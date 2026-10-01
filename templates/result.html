@@ -1,20 +1,59 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Exam Result</title>
+    <title>Exam Result & Proctoring Summary</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='result.css') }}">
 </head>
 <body>
 
 <div class="result-container">
-    <h1>📊 Exam Result</h1>
+    <h1>📊 Exam Result & Proctoring Report</h1>
 
     <div class="result-card">
-        <p><strong>Score:</strong> {{ score }} / {{ total }}</p>
-        <p><strong>Warnings:</strong> {{ warnings }}</p>
+        <div class="score-section">
+            <span class="score-label">Your Final Score</span>
+            <div class="score-value"><strong>{{ score }}</strong> / {{ total }}</div>
+        </div>
+
+        <div class="proctoring-summary">
+            <h3>🛡️ Proctoring Verification Summary</h3>
+            <div class="violation-stats">
+                <div class="vstat-item">
+                    <span class="vstat-icon">⚠️</span>
+                    <span class="vstat-title">Total Warnings:</span>
+                    <span class="vstat-num {% if warnings >= 3 %}text-danger{% elif warnings > 0 %}text-warn{% else %}text-ok{% endif %}">
+                        {{ warnings }} / 3
+                    </span>
+                </div>
+                <div class="vstat-item">
+                    <span class="vstat-icon">📱</span>
+                    <span class="vstat-title">Mobile Detections:</span>
+                    <span class="vstat-num {% if mobile_warnings and mobile_warnings > 0 %}text-danger{% else %}text-ok{% endif %}">
+                        {{ mobile_warnings or 0 }}
+                    </span>
+                </div>
+                <div class="vstat-item">
+                    <span class="vstat-icon">👁️</span>
+                    <span class="vstat-title">Eye Gaze Diverted:</span>
+                    <span class="vstat-num {% if eye_warnings and eye_warnings > 0 %}text-warn{% else %}text-ok{% endif %}">
+                        {{ eye_warnings or 0 }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="status-banner {% if warnings >= 3 %}banner-danger{% elif warnings > 0 %}banner-warn{% else %}banner-ok{% endif %}">
+                {% if warnings >= 3 %}
+                    🚫 Exam Disqualified / Auto-Terminated due to multiple violations!
+                {% elif warnings > 0 %}
+                    ⚠️ Exam submitted with {{ warnings }} warning(s). Recorded for teacher review.
+                {% else %}
+                    🟢 Clean Proctoring Record! No violations detected during the exam.
+                {% endif %}
+            </div>
+        </div>
     </div>
 
-    <a href="/" class="home-btn">🏠 Go Home</a>
+    <a href="/" class="home-btn">🏠 Return to Home</a>
 </div>
 
 </body>

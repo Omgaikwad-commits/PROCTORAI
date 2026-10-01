@@ -1,46 +1,138 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Student Scorecard</title>
+    <title>Student Scorecard & Proctoring Report</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='scorecard.css') }}">
 </head>
 <body>
 
 <div class="scorecard-container">
 
-    <h1>📊 {{ subject }} Scorecard</h1>
-    <p style="color: #ccc; margin-bottom: 20px;">
-        Teacher: {{ teacher }}
+    <h1>📊 {{ subject }} Scorecard & Proctoring Report</h1>
+    <p class="teacher-subtitle">
+        Teacher: <strong>{{ teacher }}</strong>
     </p>
 
+    <!-- Proctoring Summary Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-icon">👥</span>
+            <div class="stat-data">
+                <h3>{{ results|length }}</h3>
+                <p>Total Submissions</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-icon">📱</span>
+            <div class="stat-data">
+                <h3>
+                    {% set mobile_total = namespace(count=0) %}
+                    {% for r in results %}
+                        {% set mobile_total.count = mobile_total.count + (r[7] or 0) %}
+                    {% endfor %}
+                    {{ mobile_total.count }}
+                </h3>
+                <p>Mobile Violations</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-icon">👁️</span>
+            <div class="stat-data">
+                <h3>
+                    {% set eye_total = namespace(count=0) %}
+                    {% for r in results %}
+                        {% set eye_total.count = eye_total.count + (r[8] or 0) %}
+                    {% endfor %}
+                    {{ eye_total.count }}
+                </h3>
+                <p>Eye Gaze Violations</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-icon">⚠️</span>
+            <div class="stat-data">
+                <h3>
+                    {% set flagged_total = namespace(count=0) %}
+                    {% for r in results %}
+                        {% if r[6] > 0 %}
+                            {% set flagged_total.count = flagged_total.count + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ flagged_total.count }}
+                </h3>
+                <p>Flagged / Terminated</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results & Proctoring Table -->
     <div class="table-wrapper">
         <table>
             <thead>
                 <tr>
                     <th>Student</th>
                     <th>Roll No</th>
-                    <th>Teacher</th>
-                    <th>Subject</th>
                     <th>Score</th>
-                    <th>Warnings</th>
+                    <th>Total Warnings</th>
+                    <th>📱 Mobile Detections</th>
+                    <th>👁️ Eye Violations</th>
+                    <th>Proctoring Status</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
+                {% if results|length == 0 %}
+                <tr>
+                    <td colspan="8" style="padding: 30px; color: #bbb;">
+                        No student exam submissions yet for {{ subject }}.
+                    </td>
+                </tr>
+                {% endif %}
+
                 {% for r in results %}
                 <tr>
-                    <td>{{ r[1] }}</td>
+                    <td class="student-name">
+                        <strong>{{ r[1] }}</strong>
+                    </td>
                     <td>{{ r[2] }}</td>
-                    <td>{{ r[3] }}</td>
-                    <td>{{ r[4] }}</td>
                     <td class="score">{{ r[5] }}</td>
-                    <td class="{% if r[6] >= 2 %}warning-high{% else %}warning-low{% endif %}">
-                        {{ r[6] }}
+                    <td class="{% if r[6] >= 3 %}warning-high{% elif r[6] > 0 %}warning-mid{% else %}warning-low{% endif %}">
+                        {{ r[6] }} / 3
+                    </td>
+                    <td>
+                        {% if r[7] and r[7] > 0 %}
+                            <span class="violation-badge violation-mobile">
+                                📱 {{ r[7] }} detected
+                            </span>
+                        {% else %}
+                            <span class="violation-none">0</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if r[8] and r[8] > 0 %}
+                            <span class="violation-badge violation-eye">
+                                👁️ {{ r[8] }} diverted
+                            </span>
+                        {% else %}
+                            <span class="violation-none">0</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if r[6] >= 3 %}
+                            <span class="status-pill pill-danger">🚫 Terminated</span>
+                        {% elif r[6] > 0 %}
+                            <span class="status-pill pill-warn">⚠️ Flagged</span>
+                        {% else %}
+                            <span class="status-pill pill-success">🟢 Clean</span>
+                        {% endif %}
                     </td>
                     <td>
                         <a href="{{ url_for('delete_result', result_id=r[0]) }}"
                         class="delete-btn"
-                        onclick="return confirm('Are you sure?');">
+                        onclick="return confirm('Are you sure you want to delete this result?');">
                         🗑 Delete
                         </a>
                     </td>
@@ -50,9 +142,11 @@
         </table>
     </div>
 
-    <a href="{{ url_for('teacher_dashboard') }}" class="back-btn">
-        ⬅ Back to Dashboard
-    </a>
+    <div class="footer-actions">
+        <a href="{{ url_for('teacher_dashboard') }}" class="back-btn">
+            ⬅ Back to Dashboard
+        </a>
+    </div>
 
 </div>
 
