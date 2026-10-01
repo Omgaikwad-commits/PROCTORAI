@@ -1,0 +1,163 @@
+/* ================= BACKGROUND ================= */
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1e3c72);
+    background-size: 400% 400%;
+    animation: gradientBG 12s ease infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+}
+
+/* Animated Background */
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* ================= GLASS CONTAINER ================= */
+
+.scorecard-container {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(18px);
+    border-radius: 25px;
+    width: 95%;
+    max-width: 1100px;
+    padding: 45px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.2);
+    text-align: center;
+    transition: 0.4s ease;
+}
+
+.scorecard-container:hover {
+    transform: translateY(-6px);
+}
+
+.scorecard-container h1 {
+    margin-bottom: 30px;
+    color: white;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+/* ================= TABLE WRAPPER ================= */
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+/* ================= TABLE ================= */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 25px;
+    color: white;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Header */
+thead {
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: white;
+}
+
+th, td {
+    padding: 14px;
+    text-align: center;
+}
+
+th {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Rows */
+tbody tr {
+    background: rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    transition: 0.3s ease;
+}
+
+tbody tr:hover {
+    background: rgba(255,255,255,0.18);
+    transform: scale(1.01);
+}
+
+/* ================= SCORE STYLING ================= */
+
+.score {
+    font-weight: 600;
+    font-size: 16px;
+    color: #00e5ff;
+}
+
+/* ================= WARNING STYLING ================= */
+
+.warning-high {
+    color: #ff4d4d;
+    font-weight: bold;
+}
+
+.warning-low {
+    color: #00ff99;
+    font-weight: 500;
+}
+
+/* ================= BACK BUTTON ================= */
+
+.back-btn {
+    display: inline-block;
+    padding: 12px 25px;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: white;
+    text-decoration: none;
+    border-radius: 14px;
+    font-weight: 600;
+    transition: 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0, 114, 255, 0.4);
+}
+
+.back-btn:hover {
+    transform: scale(1.07);
+    box-shadow: 0 15px 35px rgba(0, 114, 255, 0.6);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+    .scorecard-container {
+        padding: 25px;
+    }
+
+    th, td {
+        padding: 10px;
+        font-size: 14px;
+    }
+}
+/* ================= DELETE BUTTON ================= */
+
+.delete-btn {
+    display: inline-block;
+    padding: 8px 14px;
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.3s ease;
+    box-shadow: 0 5px 15px rgba(255, 75, 43, 0.4);
+}
+
+.delete-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 8px 20px rgba(255, 75, 43, 0.6);
+}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Scorecard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='scorecard.css') }}">
+</head>
+<body>
+
+<div class="scorecard-container">
+
+    <h1>📊 {{ subject }} Scorecard</h1>
+    <p style="color: #ccc; margin-bottom: 20px;">
+        Teacher: {{ teacher }}
+    </p>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Roll No</th>
+                    <th>Teacher</th>
+                    <th>Subject</th>
+                    <th>Score</th>
+                    <th>Warnings</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in results %}
+                <tr>
+                    <td>{{ r[1] }}</td>
+                    <td>{{ r[2] }}</td>
+                    <td>{{ r[3] }}</td>
+                    <td>{{ r[4] }}</td>
+                    <td class="score">{{ r[5] }}</td>
+                    <td class="{% if r[6] >= 2 %}warning-high{% else %}warning-low{% endif %}">
+                        {{ r[6] }}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('delete_result', result_id=r[0]) }}"
+                        class="delete-btn"
+                        onclick="return confirm('Are you sure?');">
+                        🗑 Delete
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <a href="{{ url_for('teacher_dashboard') }}" class="back-btn">
+        ⬅ Back to Dashboard
+    </a>
+
+</div>
+
+</body>
+</html>

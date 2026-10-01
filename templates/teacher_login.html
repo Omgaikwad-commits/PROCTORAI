@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teacher Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="login-container">
+
+    <div class="login-card">
+        <h2>Teacher Login</h2>
+
+        <form method="POST">
+
+            <div class="input-group">
+                <input type="text" name="name" placeholder="Enter Teacher Name" required>
+            </div>
+
+            <div class="input-group">
+                <input type="text" name="subject" placeholder="Enter Subject Name" required>
+            </div>
+
+            <!-- ✅ NEW PASSWORD FIELD ADDED -->
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Enter Password" required>
+            </div>
+
+            <button type="submit" class="modern-btn">
+                Login
+            </button>
+
+        </form>
+    </div>
+
+</div>
+
+</body>
+</html>

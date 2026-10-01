@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Exam Question</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='add_exam.css') }}">
+</head>
+<body>
+
+<div class="form-container">
+
+    <h1>📝 Add Exam Question</h1>
+
+    <form method="POST" class="question-form">
+
+        <textarea name="question" placeholder="Enter Question" required></textarea>
+
+        <div class="options-grid">
+            <input type="text" name="option1" placeholder="Option 1" required>
+            <input type="text" name="option2" placeholder="Option 2" required>
+            <input type="text" name="option3" placeholder="Option 3" required>
+            <input type="text" name="option4" placeholder="Option 4" required>
+        </div>
+
+        <input type="text" name="answer" placeholder="Correct Answer (exact option text)" required>
+
+        <button type="submit" class="submit-btn">➕ Add Question</button>
+    </form>
+
+    <a href="{{ url_for('teacher_dashboard') }}" class="back-btn">⬅ Back to Dashboard</a>
+
+</div>
+
+</body>
+</html>

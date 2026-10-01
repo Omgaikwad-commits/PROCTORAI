@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="login-container">
+
+    <div class="login-card">
+        <h2>Student Login</h2>
+
+        <form method="POST">
+
+            <div class="input-group">
+                <input type="text" name="student_name" 
+                       placeholder="Enter your name" required>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" name="roll_no" 
+                    placeholder="Enter Roll Number" required>
+            </div>
+
+            <!-- ✅ NEW PASSWORD FIELD ADDED -->
+            <div class="input-group">
+                <input type="password" name="password" 
+                       placeholder="Enter Password" required>
+            </div>
+
+            <!-- SUBJECT DROPDOWN -->
+            <div class="input-group">
+                <select name="subject" required>
+                    <option value="">Select Subject</option>
+                    {% for subject in subjects %}
+                        <option value="{{ subject[0] }}">{{ subject[0] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="modern-btn">
+                Start Exam
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

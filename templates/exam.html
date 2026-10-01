@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Online Exam</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+    <script src="{{ url_for('static', filename='proctor.js') }}" defer></script>
+</head>
+<body>
+
+<!-- 🔥 FIXED TIMER (Always Visible) -->
+<div class="fixed-timer">
+    ⏳ Time Remaining: 
+    <span id="timer">30:00</span>
+</div>
+
+<div class="exam-wrapper">
+
+    <div class="exam-container">
+
+        <h1 class="exam-title">
+            {{ subject }} Exam
+        </h1>
+
+        <!-- FACE CAM -->
+        <div class="facecam-box">
+            <video id="webcam" autoplay playsinline></video>
+            <p class="monitor-text">Live Monitoring</p>
+        </div>
+
+        <form method="POST">
+
+            <input type="hidden" id="warnings" name="warnings" value="0">
+
+            {% for q in questions %}
+            <div class="question-card">
+                <h3>{{ loop.index }}. {{ q[3] }}</h3>
+
+                <label class="option">
+                    <input type="radio" name="{{ q[0] }}" value="{{ q[4] }}" required>
+                    <span>A) {{ q[4] }}</span>
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="{{ q[0] }}" value="{{ q[5] }}">
+                    <span>B) {{ q[5] }}</span>
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="{{ q[0] }}" value="{{ q[6] }}">
+                    <span>C) {{ q[6] }}</span>
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="{{ q[0] }}" value="{{ q[7] }}">
+                    <span>D) {{ q[7] }}</span>
+                </label>
+
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="submit-btn">
+                Submit Exam
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+    // ===== TIMER SETTINGS =====
+    let totalTime = 30 * 60; // 30 minutes
+    const timerElement = document.getElementById("timer");
+    const examForm = document.querySelector("form");
+
+    function updateTimer() {
+        let minutes = Math.floor(totalTime / 60);
+        let seconds = totalTime % 60;
+
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        timerElement.textContent = minutes + ":" + seconds;
+
+        // 🔥 Turn red when 1 minute left
+        if (totalTime <= 60) {
+            timerElement.style.color = "red";
+            timerElement.style.fontWeight = "bold";
+        }
+
+        if (totalTime <= 0) {
+            clearInterval(timerInterval);
+            alert("⏰ Time is up! Exam will be submitted automatically.");
+            examForm.submit();
+        }
+
+        totalTime--;
+    }
+
+    updateTimer();
+    const timerInterval = setInterval(updateTimer, 1000);
+</script>
+
+</body>
+</html>

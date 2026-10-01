@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teacher Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='teacher.css') }}">
+</head>
+<body>
+
+<div class="dashboard-container">
+
+    <h1>👩‍🏫 Teacher Dashboard</h1>
+
+    <div class="dashboard-cards">
+
+        <!-- Add Exam -->
+        <div class="card">
+            <h2>➕ Add Questions</h2>
+            <p>Create and manage exam questions.</p>
+            <a href="{{ url_for('add_exam') }}" class="btn">Go</a>
+        </div>
+
+        <!-- View Scorecard -->
+        <div class="card">
+            <h2>📊 View Scorecard</h2>
+            <p>Check students' performance and results.</p>
+            <a href="{{ url_for('scorecard') }}" class="btn">Go</a>
+        </div>
+
+        <!-- Manage Questions -->
+        <div class="card">
+            <h2>📋 Manage Questions</h2>
+            <p>View and delete created questions.</p>
+            <a href="{{ url_for('manage_questions') }}" class="btn">Go</a>
+        </div>
+
+        <!-- Logout -->
+        <div class="card logout-card">
+            <h2>🚪 Logout</h2>
+            <p>Securely exit the dashboard.</p>
+            <a href="{{ url_for('logout') }}" class="btn logout-btn">Logout</a>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
