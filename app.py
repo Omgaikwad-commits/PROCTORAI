@@ -43,13 +43,14 @@ def init_db():
                     answer TEXT
                 )''')
 
-    # ✅ UPDATED (added roll_no, mobile_warnings, eye_warnings, tab_warnings, face_warnings)
+    # ✅ UPDATED (added roll_no, mobile_warnings, eye_warnings, tab_warnings, face_warnings, department)
     c.execute('''CREATE TABLE IF NOT EXISTS results(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     student_name TEXT,
                     roll_no TEXT,
                     teacher_name TEXT,
                     subject TEXT,
+                    department TEXT DEFAULT '',
                     score INTEGER,
                     warnings INTEGER,
                     mobile_warnings INTEGER DEFAULT 0,
@@ -73,6 +74,8 @@ def init_db():
 
     c.execute("PRAGMA table_info(results)")
     columns = [col[1] for col in c.fetchall()]
+    if "department" not in columns:
+        c.execute("ALTER TABLE results ADD COLUMN department TEXT DEFAULT ''")
     if "mobile_warnings" not in columns:
         c.execute("ALTER TABLE results ADD COLUMN mobile_warnings INTEGER DEFAULT 0")
     if "eye_warnings" not in columns:
@@ -233,10 +236,17 @@ def scorecard():
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
 
-    c.execute("""SELECT id, student_name, roll_no, teacher_name, subject, score, warnings,
-                        COALESCE(mobile_warnings, 0), COALESCE(eye_warnings, 0),
-                        COALESCE(tab_warnings, 0), COALESCE(face_warnings, 0)
-                 FROM results WHERE subject = ?""",
+    c.execute("""SELECT r.id,
+                        r.roll_no,
+                        r.student_name,
+                        COALESCE(NULLIF(r.department, ''), NULLIF(s.department, ''), 'General') AS department,
+                        r.subject,
+                        r.warnings,
+                        r.score
+                 FROM results r
+                 LEFT JOIN students s ON r.roll_no = s.roll_no
+                 WHERE r.subject = ?
+                 ORDER BY r.id DESC""",
               (session["subject"],))
     data = c.fetchall()
 
@@ -369,14 +379,17 @@ def exam():
             if selected == q[8]:
                 score += 1
 
+        department = session.get("department", "")
+
         c.execute("""INSERT INTO results(student_name, roll_no, teacher_name,
-                    subject, score, warnings, mobile_warnings, eye_warnings,
+                    subject, department, score, warnings, mobile_warnings, eye_warnings,
                     tab_warnings, face_warnings)
-                    VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
                 (session["student_name"],
                  session["roll_no"],
                  teacher_name,
                  subject,
+                 department,
                  score,
                  warnings,
                  mobile_warnings,

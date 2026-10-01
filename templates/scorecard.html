@@ -8,74 +8,34 @@
 
 <div class="scorecard-container">
 
-    <h1>📊 {{ subject }} Scorecard & Proctoring Report</h1>
+    <h1>📊 {{ subject }} Scorecard</h1>
     <p class="teacher-subtitle">
         Teacher: <strong>{{ teacher }}</strong>
     </p>
 
-    <!-- Proctoring Summary Statistics -->
+    <!-- Overview Summary Cards -->
     <div class="stats-grid">
         <div class="stat-card">
             <span class="stat-icon">👥</span>
             <div class="stat-data">
                 <h3>{{ results|length }}</h3>
-                <p>Total Submissions</p>
+                <p>Total Students</p>
             </div>
         </div>
 
         <div class="stat-card">
-            <span class="stat-icon">📱</span>
+            <span class="stat-icon">🟢</span>
             <div class="stat-data">
                 <h3>
-                    {% set mobile_total = namespace(count=0) %}
+                    {% set clean_total = namespace(count=0) %}
                     {% for r in results %}
-                        {% set mobile_total.count = mobile_total.count + (r[7] or 0) %}
+                        {% if r[5] == 0 %}
+                            {% set clean_total.count = clean_total.count + 1 %}
+                        {% endif %}
                     {% endfor %}
-                    {{ mobile_total.count }}
+                    {{ clean_total.count }}
                 </h3>
-                <p>Mobile Violations</p>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <span class="stat-icon">👁️</span>
-            <div class="stat-data">
-                <h3>
-                    {% set eye_total = namespace(count=0) %}
-                    {% for r in results %}
-                        {% set eye_total.count = eye_total.count + (r[8] or 0) %}
-                    {% endfor %}
-                    {{ eye_total.count }}
-                </h3>
-                <p>Eye Gaze Violations</p>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <span class="stat-icon">💻</span>
-            <div class="stat-data">
-                <h3>
-                    {% set tab_total = namespace(count=0) %}
-                    {% for r in results %}
-                        {% set tab_total.count = tab_total.count + (r[9] or 0) %}
-                    {% endfor %}
-                    {{ tab_total.count }}
-                </h3>
-                <p>Tab Switches</p>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <span class="stat-icon">👥</span>
-            <div class="stat-data">
-                <h3>
-                    {% set face_total = namespace(count=0) %}
-                    {% for r in results %}
-                        {% set face_total.count = face_total.count + (r[10] or 0) %}
-                    {% endfor %}
-                    {{ face_total.count }}
-                </h3>
-                <p>Multiple People</p>
+                <p>Clean / Verified</p>
             </div>
         </div>
 
@@ -85,7 +45,7 @@
                 <h3>
                     {% set flagged_total = namespace(count=0) %}
                     {% for r in results %}
-                        {% if r[6] > 0 %}
+                        {% if r[5] > 0 %}
                             {% set flagged_total.count = flagged_total.count + 1 %}
                         {% endif %}
                     {% endfor %}
@@ -96,27 +56,25 @@
         </div>
     </div>
 
-    <!-- Results & Proctoring Table -->
+    <!-- Student Results Table -->
     <div class="table-wrapper">
         <table>
             <thead>
                 <tr>
-                    <th>Student</th>
-                    <th>Roll No</th>
-                    <th>Score</th>
+                    <th>Roll Number</th>
+                    <th>Student Name</th>
+                    <th>Department</th>
+                    <th>Subject</th>
                     <th>Total Warnings</th>
-                    <th>📱 Mobile</th>
-                    <th>👁️ Eye Gaze</th>
-                    <th>💻 Tab Switches</th>
-                    <th>👥 Multi-People</th>
                     <th>Proctoring Status</th>
+                    <th>Score</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 {% if results|length == 0 %}
                 <tr>
-                    <td colspan="10" style="padding: 30px; color: #bbb;">
+                    <td colspan="8" style="padding: 30px; color: #bbb;">
                         No student exam submissions yet for {{ subject }}.
                     </td>
                 </tr>
@@ -124,59 +82,25 @@
 
                 {% for r in results %}
                 <tr>
-                    <td class="student-name">
+                    <td class="roll-no">
                         <strong>{{ r[1] }}</strong>
                     </td>
-                    <td>{{ r[2] }}</td>
-                    <td class="score">{{ r[5] }}</td>
-                    <td class="{% if r[6] >= 3 %}warning-high{% elif r[6] > 0 %}warning-mid{% else %}warning-low{% endif %}">
-                        {{ r[6] }} / 3
+                    <td class="student-name">{{ r[2] }}</td>
+                    <td>{{ r[3] }}</td>
+                    <td>{{ r[4] }}</td>
+                    <td class="{% if r[5] >= 3 %}warning-high{% elif r[5] > 0 %}warning-mid{% else %}warning-low{% endif %}">
+                        {{ r[5] }} / 3
                     </td>
                     <td>
-                        {% if r[7] and r[7] > 0 %}
-                            <span class="violation-badge violation-mobile">
-                                📱 {{ r[7] }}
-                            </span>
-                        {% else %}
-                            <span class="violation-none">0</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if r[8] and r[8] > 0 %}
-                            <span class="violation-badge violation-eye">
-                                👁️ {{ r[8] }}
-                            </span>
-                        {% else %}
-                            <span class="violation-none">0</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if r[9] and r[9] > 0 %}
-                            <span class="violation-badge violation-tab">
-                                💻 {{ r[9] }}
-                            </span>
-                        {% else %}
-                            <span class="violation-none">0</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if r[10] and r[10] > 0 %}
-                            <span class="violation-badge violation-face">
-                                👥 {{ r[10] }}
-                            </span>
-                        {% else %}
-                            <span class="violation-none">0</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if r[6] >= 3 %}
+                        {% if r[5] >= 3 %}
                             <span class="status-pill pill-danger">🚫 Terminated</span>
-                        {% elif r[6] > 0 %}
+                        {% elif r[5] > 0 %}
                             <span class="status-pill pill-warn">⚠️ Flagged</span>
                         {% else %}
                             <span class="status-pill pill-success">🟢 Clean</span>
                         {% endif %}
                     </td>
+                    <td class="score">{{ r[6] }}</td>
                     <td>
                         <a href="{{ url_for('delete_result', result_id=r[0]) }}"
                         class="delete-btn"
