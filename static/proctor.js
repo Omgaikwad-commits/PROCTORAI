@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const warningInput = document.getElementById("warnings") || document.querySelector('input[name="warnings"]');
     const mobileWarningInput = document.getElementById("mobile_warnings") || document.querySelector('input[name="mobile_warnings"]');
     const eyeWarningInput = document.getElementById("eye_warnings") || document.querySelector('input[name="eye_warnings"]');
+    const tabWarningInput = document.getElementById("tab_warnings") || document.querySelector('input[name="tab_warnings"]');
+    const faceWarningInput = document.getElementById("face_warnings") || document.querySelector('input[name="face_warnings"]');
     const examForm = document.querySelector("form");
 
     const hudFaceText = document.getElementById("hud-face-text");
@@ -20,6 +22,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let warnings = 0;
     let mobileWarnings = 0;
     let eyeWarnings = 0;
+    let tabWarnings = 0;
+    let faceWarnings = 0;
     const MAX_WARNINGS = 3;
     let isTerminated = false;
 
@@ -96,12 +100,18 @@ document.addEventListener("DOMContentLoaded", function () {
             mobileWarnings++;
         } else if (type === "eye") {
             eyeWarnings++;
+        } else if (type === "tab") {
+            tabWarnings++;
+        } else if (type === "face") {
+            faceWarnings++;
         }
 
         // Sync hidden input values for server submission
         if (warningInput) warningInput.value = warnings;
         if (mobileWarningInput) mobileWarningInput.value = mobileWarnings;
         if (eyeWarningInput) eyeWarningInput.value = eyeWarnings;
+        if (tabWarningInput) tabWarningInput.value = tabWarnings;
+        if (faceWarningInput) faceWarningInput.value = faceWarnings;
 
         // Update HUD
         if (hudWarningCount) {
@@ -158,15 +168,27 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (warningInput) warningInput.value = warnings;
                 if (mobileWarningInput) mobileWarningInput.value = mobileWarnings;
                 if (eyeWarningInput) eyeWarningInput.value = eyeWarnings;
+                if (tabWarningInput) tabWarningInput.value = tabWarnings;
+                if (faceWarningInput) faceWarningInput.value = faceWarnings;
                 examForm.submit();
             }
         }, 1200);
     }
 
     // ================= TAB SWITCH DETECTION =================
+    let tabCooldown = false;
+    function handleTabSwitch(reason) {
+        if (tabCooldown || isTerminated) return;
+        tabCooldown = true;
+        giveWarning(reason, "tab");
+        setTimeout(() => {
+            tabCooldown = false;
+        }, 2500);
+    }
+
     document.addEventListener("visibilitychange", function () {
         if (document.hidden && !isTerminated) {
-            giveWarning("Tab switch detected! Do not navigate away from the exam window.", "tab");
+            handleTabSwitch("Tab switch detected! Do not navigate away from the exam window.");
         }
     });
 
@@ -175,7 +197,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // Give brief debounce for OS notifications
             setTimeout(() => {
                 if (document.hidden && !isTerminated) {
-                    giveWarning("Window lost focus! Please stay on the exam screen.", "tab");
+                    handleTabSwitch("Window lost focus / switched! Please stay on the exam screen.");
                 }
             }, 300);
         }
@@ -264,6 +286,21 @@ document.addEventListener("DOMContentLoaded", function () {
                     phone = p;
                     break;
                 }
+            }
+
+            // Check for multiple people in camera view
+            let personCount = 0;
+            for (const p of predictions) {
+                if (p.class === "person" && p.score >= 0.55) {
+                    personCount++;
+                }
+            }
+            if (personCount > 1 && !multiFaceCooldown) {
+                multiFaceCooldown = true;
+                giveWarning("👥 Multiple people detected in camera! Only the candidate may be present.", "face");
+                setTimeout(() => {
+                    multiFaceCooldown = false;
+                }, 5000);
             }
 
             if (phone) {

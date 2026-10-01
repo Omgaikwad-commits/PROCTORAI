@@ -20,26 +20,60 @@
             <div class="violation-stats">
                 <div class="vstat-item">
                     <span class="vstat-icon">⚠️</span>
-                    <span class="vstat-title">Total Warnings:</span>
+                    <span class="vstat-title">Total Warnings</span>
                     <span class="vstat-num {% if warnings >= 3 %}text-danger{% elif warnings > 0 %}text-warn{% else %}text-ok{% endif %}">
                         {{ warnings }} / 3
                     </span>
                 </div>
                 <div class="vstat-item">
                     <span class="vstat-icon">📱</span>
-                    <span class="vstat-title">Mobile Detections:</span>
+                    <span class="vstat-title">Mobile Phone</span>
                     <span class="vstat-num {% if mobile_warnings and mobile_warnings > 0 %}text-danger{% else %}text-ok{% endif %}">
                         {{ mobile_warnings or 0 }}
                     </span>
                 </div>
                 <div class="vstat-item">
                     <span class="vstat-icon">👁️</span>
-                    <span class="vstat-title">Eye Gaze Diverted:</span>
+                    <span class="vstat-title">Eye Gaze Away</span>
                     <span class="vstat-num {% if eye_warnings and eye_warnings > 0 %}text-warn{% else %}text-ok{% endif %}">
                         {{ eye_warnings or 0 }}
                     </span>
                 </div>
+                <div class="vstat-item">
+                    <span class="vstat-icon">💻</span>
+                    <span class="vstat-title">Tab Switches</span>
+                    <span class="vstat-num {% if tab_warnings and tab_warnings > 0 %}text-danger{% else %}text-ok{% endif %}">
+                        {{ tab_warnings or 0 }}
+                    </span>
+                </div>
+                <div class="vstat-item">
+                    <span class="vstat-icon">👥</span>
+                    <span class="vstat-title">Multiple People</span>
+                    <span class="vstat-num {% if face_warnings and face_warnings > 0 %}text-danger{% else %}text-ok{% endif %}">
+                        {{ face_warnings or 0 }}
+                    </span>
+                </div>
             </div>
+
+            {% if warnings > 0 %}
+            <div class="violation-breakdown-box">
+                <h4>Violation Log Details:</h4>
+                <ul>
+                    {% if tab_warnings and tab_warnings > 0 %}
+                    <li>💻 <strong>Tab Switching:</strong> {{ tab_warnings }} unauthorized window / tab switch event(s) detected.</li>
+                    {% endif %}
+                    {% if face_warnings and face_warnings > 0 %}
+                    <li>👥 <strong>Multiple Faces / People:</strong> {{ face_warnings }} instance(s) of multiple persons in camera frame.</li>
+                    {% endif %}
+                    {% if mobile_warnings and mobile_warnings > 0 %}
+                    <li>📱 <strong>Mobile Detection:</strong> {{ mobile_warnings }} instance(s) of mobile phone detected in camera view.</li>
+                    {% endif %}
+                    {% if eye_warnings and eye_warnings > 0 %}
+                    <li>👁️ <strong>Eye Gaze Diverted:</strong> {{ eye_warnings }} instance(s) of student looking away from exam screen.</li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
 
             <div class="status-banner {% if warnings >= 3 %}banner-danger{% elif warnings > 0 %}banner-warn{% else %}banner-ok{% endif %}">
                 {% if warnings >= 3 %}

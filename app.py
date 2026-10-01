@@ -40,7 +40,7 @@ def init_db():
                     answer TEXT
                 )''')
 
-    # ✅ UPDATED (added roll_no, mobile_warnings, eye_warnings)
+    # ✅ UPDATED (added roll_no, mobile_warnings, eye_warnings, tab_warnings, face_warnings)
     c.execute('''CREATE TABLE IF NOT EXISTS results(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     student_name TEXT,
@@ -50,7 +50,9 @@ def init_db():
                     score INTEGER,
                     warnings INTEGER,
                     mobile_warnings INTEGER DEFAULT 0,
-                    eye_warnings INTEGER DEFAULT 0
+                    eye_warnings INTEGER DEFAULT 0,
+                    tab_warnings INTEGER DEFAULT 0,
+                    face_warnings INTEGER DEFAULT 0
                 )''')
 
     # Safe schema migration for existing databases
@@ -60,6 +62,10 @@ def init_db():
         c.execute("ALTER TABLE results ADD COLUMN mobile_warnings INTEGER DEFAULT 0")
     if "eye_warnings" not in columns:
         c.execute("ALTER TABLE results ADD COLUMN eye_warnings INTEGER DEFAULT 0")
+    if "tab_warnings" not in columns:
+        c.execute("ALTER TABLE results ADD COLUMN tab_warnings INTEGER DEFAULT 0")
+    if "face_warnings" not in columns:
+        c.execute("ALTER TABLE results ADD COLUMN face_warnings INTEGER DEFAULT 0")
 
     conn.commit()
     conn.close()
@@ -195,7 +201,8 @@ def scorecard():
     c = conn.cursor()
 
     c.execute("""SELECT id, student_name, roll_no, teacher_name, subject, score, warnings,
-                        COALESCE(mobile_warnings, 0), COALESCE(eye_warnings, 0)
+                        COALESCE(mobile_warnings, 0), COALESCE(eye_warnings, 0),
+                        COALESCE(tab_warnings, 0), COALESCE(face_warnings, 0)
                  FROM results WHERE subject = ?""",
               (session["subject"],))
     data = c.fetchall()
@@ -282,6 +289,8 @@ def exam():
         warnings = int(request.form.get("warnings") or 0)
         mobile_warnings = int(request.form.get("mobile_warnings") or 0)
         eye_warnings = int(request.form.get("eye_warnings") or 0)
+        tab_warnings = int(request.form.get("tab_warnings") or 0)
+        face_warnings = int(request.form.get("face_warnings") or 0)
 
         teacher_name = questions[0][1] if questions else ""
         subject = session["exam_subject"]
@@ -292,8 +301,9 @@ def exam():
                 score += 1
 
         c.execute("""INSERT INTO results(student_name, roll_no, teacher_name,
-                    subject, score, warnings, mobile_warnings, eye_warnings)
-                    VALUES (?,?,?,?,?,?,?,?)""",
+                    subject, score, warnings, mobile_warnings, eye_warnings,
+                    tab_warnings, face_warnings)
+                    VALUES (?,?,?,?,?,?,?,?,?,?)""",
                 (session["student_name"],
                  session["roll_no"],
                  teacher_name,
@@ -301,7 +311,9 @@ def exam():
                  score,
                  warnings,
                  mobile_warnings,
-                 eye_warnings))
+                 eye_warnings,
+                 tab_warnings,
+                 face_warnings))
 
         conn.commit()
         conn.close()
@@ -311,7 +323,9 @@ def exam():
                                total=len(questions),
                                warnings=warnings,
                                mobile_warnings=mobile_warnings,
-                               eye_warnings=eye_warnings)
+                               eye_warnings=eye_warnings,
+                               tab_warnings=tab_warnings,
+                               face_warnings=face_warnings)
 
     conn.close()
     return render_template("exam.html",

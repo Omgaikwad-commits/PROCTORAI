@@ -52,6 +52,34 @@
         </div>
 
         <div class="stat-card">
+            <span class="stat-icon">💻</span>
+            <div class="stat-data">
+                <h3>
+                    {% set tab_total = namespace(count=0) %}
+                    {% for r in results %}
+                        {% set tab_total.count = tab_total.count + (r[9] or 0) %}
+                    {% endfor %}
+                    {{ tab_total.count }}
+                </h3>
+                <p>Tab Switches</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-icon">👥</span>
+            <div class="stat-data">
+                <h3>
+                    {% set face_total = namespace(count=0) %}
+                    {% for r in results %}
+                        {% set face_total.count = face_total.count + (r[10] or 0) %}
+                    {% endfor %}
+                    {{ face_total.count }}
+                </h3>
+                <p>Multiple People</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
             <span class="stat-icon">⚠️</span>
             <div class="stat-data">
                 <h3>
@@ -77,8 +105,10 @@
                     <th>Roll No</th>
                     <th>Score</th>
                     <th>Total Warnings</th>
-                    <th>📱 Mobile Detections</th>
-                    <th>👁️ Eye Violations</th>
+                    <th>📱 Mobile</th>
+                    <th>👁️ Eye Gaze</th>
+                    <th>💻 Tab Switches</th>
+                    <th>👥 Multi-People</th>
                     <th>Proctoring Status</th>
                     <th>Action</th>
                 </tr>
@@ -86,7 +116,7 @@
             <tbody>
                 {% if results|length == 0 %}
                 <tr>
-                    <td colspan="8" style="padding: 30px; color: #bbb;">
+                    <td colspan="10" style="padding: 30px; color: #bbb;">
                         No student exam submissions yet for {{ subject }}.
                     </td>
                 </tr>
@@ -105,7 +135,7 @@
                     <td>
                         {% if r[7] and r[7] > 0 %}
                             <span class="violation-badge violation-mobile">
-                                📱 {{ r[7] }} detected
+                                📱 {{ r[7] }}
                             </span>
                         {% else %}
                             <span class="violation-none">0</span>
@@ -114,7 +144,25 @@
                     <td>
                         {% if r[8] and r[8] > 0 %}
                             <span class="violation-badge violation-eye">
-                                👁️ {{ r[8] }} diverted
+                                👁️ {{ r[8] }}
+                            </span>
+                        {% else %}
+                            <span class="violation-none">0</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if r[9] and r[9] > 0 %}
+                            <span class="violation-badge violation-tab">
+                                💻 {{ r[9] }}
+                            </span>
+                        {% else %}
+                            <span class="violation-none">0</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if r[10] and r[10] > 0 %}
+                            <span class="violation-badge violation-face">
+                                👥 {{ r[10] }}
                             </span>
                         {% else %}
                             <span class="violation-none">0</span>

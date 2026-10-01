@@ -192,6 +192,18 @@ tbody tr:hover {
     border: 1px solid rgba(255, 170, 0, 0.4);
 }
 
+.violation-tab {
+    background: rgba(0, 198, 255, 0.2);
+    color: #00c6ff;
+    border: 1px solid rgba(0, 198, 255, 0.4);
+}
+
+.violation-face {
+    background: rgba(230, 80, 255, 0.2);
+    color: #e650ff;
+    border: 1px solid rgba(230, 80, 255, 0.4);
+}
+
 .violation-none {
     color: #777;
     font-size: 13px;

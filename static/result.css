@@ -26,7 +26,7 @@ body {
     text-align: center;
     color: white;
     width: 100%;
-    max-width: 650px;
+    max-width: 820px;
 }
 
 /* ================= GLASS RESULT CARD ================= */
@@ -82,37 +82,41 @@ body {
 }
 
 .violation-stats {
-    display: flex;
-    justify-content: space-around;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+    gap: 10px;
     margin-bottom: 25px;
-    flex-wrap: wrap;
 }
 
 .vstat-item {
     background: rgba(0, 0, 0, 0.35);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 14px;
-    padding: 12px 18px;
-    flex: 1;
-    min-width: 140px;
+    padding: 14px 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.vstat-item:hover {
+    transform: translateY(-2px);
+    background: rgba(0, 0, 0, 0.48);
 }
 
 .vstat-icon {
-    font-size: 22px;
+    font-size: 24px;
 }
 
 .vstat-title {
-    font-size: 12px;
-    color: #aaa;
+    font-size: 11px;
+    color: #bbb;
+    white-space: nowrap;
 }
 
 .vstat-num {
-    font-size: 18px;
+    font-size: 19px;
     font-weight: 700;
 }
 
@@ -126,6 +130,35 @@ body {
 
 .text-danger {
     color: #ff3366;
+}
+
+/* ================= VIOLATION BREAKDOWN BOX ================= */
+
+.violation-breakdown-box {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 14px;
+    padding: 16px 22px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.violation-breakdown-box h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #ffaa00;
+}
+
+.violation-breakdown-box ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.violation-breakdown-box li {
+    font-size: 13px;
+    color: #eee;
+    margin-bottom: 6px;
+    line-height: 1.4;
 }
 
 /* Status Banner */
@@ -195,13 +228,13 @@ body {
 
 /* ================= RESPONSIVE ================= */
 
-@media (max-width: 600px) {
+@media (max-width: 650px) {
     .result-card {
-        padding: 25px 20px;
+        padding: 25px 18px;
     }
 
     .violation-stats {
-        flex-direction: column;
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .score-value strong {
