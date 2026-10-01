@@ -1,91 +1,90 @@
 from flask import Flask, render_template, request, redirect, session
-import sqlite3
+import os
+import pymysql
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = "secretkey"
 
-DATABASE = "database.db"
+# ================= DATABASE CONFIGURATION =================
+DB_HOST = os.environ.get("DB_HOST", "localhost")
+DB_USER = os.environ.get("DB_USER", "root")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "root123")
+DB_NAME = os.environ.get("DB_NAME", "exam_proctoring")
+DB_PORT = int(os.environ.get("DB_PORT", 3306))
 
-# ================= DATABASE =================
+def get_db():
+    return pymysql.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_NAME,
+        port=DB_PORT,
+        autocommit=True
+    )
 
 def init_db():
-    conn = sqlite3.connect(DATABASE)
-    c = conn.cursor()
+    # Ensure MySQL database exists
+    try:
+        server_conn = pymysql.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            port=DB_PORT,
+            autocommit=True
+        )
+        with server_conn.cursor() as s_cursor:
+            s_cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{DB_NAME}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+        server_conn.close()
+    except Exception as e:
+        print(f"Database check warning: {e}")
 
-    c.execute('''CREATE TABLE IF NOT EXISTS teachers(
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT UNIQUE,
-                    subject TEXT,
-                    department TEXT DEFAULT '',
-                    password TEXT
-                )''')
+    conn = get_db()
+    with conn.cursor() as c:
+        c.execute('''CREATE TABLE IF NOT EXISTS teachers(
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        name VARCHAR(100) UNIQUE,
+                        subject VARCHAR(100),
+                        department VARCHAR(100) DEFAULT '',
+                        password VARCHAR(255)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
 
-    # ✅ UPDATED (added roll_no, department, class)
-    c.execute('''CREATE TABLE IF NOT EXISTS students(
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT,
-                    roll_no TEXT UNIQUE,
-                    department TEXT DEFAULT '',
-                    class TEXT DEFAULT '',
-                    password TEXT
-                )''')
+        c.execute('''CREATE TABLE IF NOT EXISTS students(
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        name VARCHAR(100),
+                        roll_no VARCHAR(50) UNIQUE,
+                        department VARCHAR(100) DEFAULT '',
+                        class VARCHAR(50) DEFAULT '',
+                        password VARCHAR(255)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
 
-    c.execute('''CREATE TABLE IF NOT EXISTS exams(
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    teacher_name TEXT,
-                    subject TEXT,
-                    question TEXT,
-                    option1 TEXT,
-                    option2 TEXT,
-                    option3 TEXT,
-                    option4 TEXT,
-                    answer TEXT
-                )''')
+        c.execute('''CREATE TABLE IF NOT EXISTS exams(
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        teacher_name VARCHAR(100),
+                        subject VARCHAR(100),
+                        question TEXT,
+                        option1 TEXT,
+                        option2 TEXT,
+                        option3 TEXT,
+                        option4 TEXT,
+                        answer TEXT
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
 
-    # ✅ UPDATED (added roll_no, mobile_warnings, eye_warnings, tab_warnings, face_warnings, department)
-    c.execute('''CREATE TABLE IF NOT EXISTS results(
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    student_name TEXT,
-                    roll_no TEXT,
-                    teacher_name TEXT,
-                    subject TEXT,
-                    department TEXT DEFAULT '',
-                    score INTEGER,
-                    warnings INTEGER,
-                    mobile_warnings INTEGER DEFAULT 0,
-                    eye_warnings INTEGER DEFAULT 0,
-                    tab_warnings INTEGER DEFAULT 0,
-                    face_warnings INTEGER DEFAULT 0
-                )''')
+        c.execute('''CREATE TABLE IF NOT EXISTS results(
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        student_name VARCHAR(100),
+                        roll_no VARCHAR(50),
+                        teacher_name VARCHAR(100),
+                        subject VARCHAR(100),
+                        department VARCHAR(100) DEFAULT '',
+                        score INT DEFAULT 0,
+                        warnings INT DEFAULT 0,
+                        mobile_warnings INT DEFAULT 0,
+                        eye_warnings INT DEFAULT 0,
+                        tab_warnings INT DEFAULT 0,
+                        face_warnings INT DEFAULT 0
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
 
-    # Safe schema migration for existing databases
-    c.execute("PRAGMA table_info(teachers)")
-    t_cols = [col[1] for col in c.fetchall()]
-    if "department" not in t_cols:
-        c.execute("ALTER TABLE teachers ADD COLUMN department TEXT DEFAULT ''")
-
-    c.execute("PRAGMA table_info(students)")
-    s_cols = [col[1] for col in c.fetchall()]
-    if "department" not in s_cols:
-        c.execute("ALTER TABLE students ADD COLUMN department TEXT DEFAULT ''")
-    if "class" not in s_cols:
-        c.execute("ALTER TABLE students ADD COLUMN class TEXT DEFAULT ''")
-
-    c.execute("PRAGMA table_info(results)")
-    columns = [col[1] for col in c.fetchall()]
-    if "department" not in columns:
-        c.execute("ALTER TABLE results ADD COLUMN department TEXT DEFAULT ''")
-    if "mobile_warnings" not in columns:
-        c.execute("ALTER TABLE results ADD COLUMN mobile_warnings INTEGER DEFAULT 0")
-    if "eye_warnings" not in columns:
-        c.execute("ALTER TABLE results ADD COLUMN eye_warnings INTEGER DEFAULT 0")
-    if "tab_warnings" not in columns:
-        c.execute("ALTER TABLE results ADD COLUMN tab_warnings INTEGER DEFAULT 0")
-    if "face_warnings" not in columns:
-        c.execute("ALTER TABLE results ADD COLUMN face_warnings INTEGER DEFAULT 0")
-
-    conn.commit()
     conn.close()
 
 init_db()
@@ -104,10 +103,10 @@ def teacher():
         name = request.form["name"].strip()
         password = request.form["password"]
 
-        conn = sqlite3.connect(DATABASE)
+        conn = get_db()
         c = conn.cursor()
 
-        c.execute("SELECT id, name, subject, department, password FROM teachers WHERE name = ?", (name,))
+        c.execute("SELECT id, name, subject, department, password FROM teachers WHERE name = %s", (name,))
         t = c.fetchone()
         conn.close()
 
@@ -129,19 +128,18 @@ def teacher_register():
         department = request.form["department"].strip()
         password = request.form["password"]
 
-        conn = sqlite3.connect(DATABASE)
+        conn = get_db()
         c = conn.cursor()
 
-        c.execute("SELECT id FROM teachers WHERE name = ?", (name,))
+        c.execute("SELECT id FROM teachers WHERE name = %s", (name,))
         if c.fetchone():
             conn.close()
             return render_template("teacher_register.html", error="Teacher name already registered! Please login.")
 
         hashed_password = generate_password_hash(password)
         c.execute("""INSERT INTO teachers(name, subject, department, password)
-                     VALUES (?,?,?,?)""",
+                     VALUES (%s, %s, %s, %s)""",
                   (name, subject, department, hashed_password))
-        conn.commit()
         conn.close()
 
         session["teacher_name"] = name
@@ -172,12 +170,12 @@ def add_exam():
         return redirect("/teacher")
 
     if request.method == "POST":
-        conn = sqlite3.connect(DATABASE)
+        conn = get_db()
         c = conn.cursor()
 
         c.execute("""INSERT INTO exams(teacher_name, subject, question,
                     option1, option2, option3, option4, answer)
-                    VALUES (?,?,?,?,?,?,?,?)""",
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
                   (session["teacher_name"],
                    session["subject"],
                    request.form["question"],
@@ -187,7 +185,6 @@ def add_exam():
                    request.form["option4"],
                    request.form["answer"]))
 
-        conn.commit()
         conn.close()
 
         return redirect("/teacher_dashboard")
@@ -199,10 +196,10 @@ def manage_questions():
     if "teacher_name" not in session:
         return redirect("/teacher")
 
-    conn = sqlite3.connect(DATABASE)
+    conn = get_db()
     c = conn.cursor()
 
-    c.execute("SELECT * FROM exams WHERE subject = ?",
+    c.execute("SELECT * FROM exams WHERE subject = %s",
               (session["subject"],))
     questions = c.fetchall()
     conn.close()
@@ -216,14 +213,13 @@ def delete_question(question_id):
     if "teacher_name" not in session:
         return redirect("/teacher")
 
-    conn = sqlite3.connect(DATABASE)
+    conn = get_db()
     c = conn.cursor()
 
     c.execute("""DELETE FROM exams
-                 WHERE id = ? AND subject = ?""",
+                 WHERE id = %s AND subject = %s""",
               (question_id, session["subject"]))
 
-    conn.commit()
     conn.close()
 
     return redirect("/manage_questions")
@@ -233,7 +229,7 @@ def scorecard():
     if "teacher_name" not in session:
         return redirect("/teacher")
 
-    conn = sqlite3.connect(DATABASE)
+    conn = get_db()
     c = conn.cursor()
 
     c.execute("""SELECT r.id,
@@ -245,7 +241,7 @@ def scorecard():
                         r.score
                  FROM results r
                  LEFT JOIN students s ON r.roll_no = s.roll_no
-                 WHERE r.subject = ?
+                 WHERE r.subject = %s
                  ORDER BY r.id DESC""",
               (session["subject"],))
     data = c.fetchall()
@@ -262,25 +258,22 @@ def delete_result(result_id):
     if "teacher_name" not in session:
         return redirect("/teacher")
 
-    conn = sqlite3.connect(DATABASE)
+    conn = get_db()
     c = conn.cursor()
 
     c.execute("""DELETE FROM results
-                 WHERE id = ? AND subject = ?""",
+                 WHERE id = %s AND subject = %s""",
               (result_id, session["subject"]))
 
-    conn.commit()
     conn.close()
 
     return redirect("/scorecard")
-
-# ================= STUDENT LOGIN =================
 
 # ================= STUDENT AUTH =================
 
 @app.route("/student", methods=["GET", "POST"])
 def student():
-    conn = sqlite3.connect(DATABASE)
+    conn = get_db()
     c = conn.cursor()
 
     c.execute("SELECT DISTINCT subject FROM exams")
@@ -298,7 +291,7 @@ def student():
             conn.close()
             return render_template("student_login.html", subjects=subjects, error="Please select an exam subject.")
 
-        c.execute("SELECT id, name, roll_no, department, class, password FROM students WHERE roll_no = ?", (roll_no,))
+        c.execute("SELECT id, name, roll_no, department, class, password FROM students WHERE roll_no = %s", (roll_no,))
         student_row = c.fetchone()
 
         if not student_row:
@@ -330,19 +323,18 @@ def student_register():
         roll_no = request.form["roll_no"].strip()
         password = request.form["password"]
 
-        conn = sqlite3.connect(DATABASE)
+        conn = get_db()
         c = conn.cursor()
 
-        c.execute("SELECT id FROM students WHERE roll_no = ?", (roll_no,))
+        c.execute("SELECT id FROM students WHERE roll_no = %s", (roll_no,))
         if c.fetchone():
             conn.close()
             return render_template("student_register.html", error="Roll number already registered! Please login.")
 
         hashed_password = generate_password_hash(password)
         c.execute("""INSERT INTO students(name, roll_no, department, class, password)
-                     VALUES (?,?,?,?,?)""",
+                     VALUES (%s, %s, %s, %s, %s)""",
                   (name, roll_no, department, student_class, hashed_password))
-        conn.commit()
         conn.close()
 
         return redirect("/student?registered=1")
@@ -356,10 +348,10 @@ def exam():
     if "exam_subject" not in session:
         return redirect("/student")
 
-    conn = sqlite3.connect(DATABASE)
+    conn = get_db()
     c = conn.cursor()
 
-    c.execute("SELECT * FROM exams WHERE subject = ?",
+    c.execute("SELECT * FROM exams WHERE subject = %s",
               (session["exam_subject"],))
     questions = c.fetchall()
 
@@ -384,7 +376,7 @@ def exam():
         c.execute("""INSERT INTO results(student_name, roll_no, teacher_name,
                     subject, department, score, warnings, mobile_warnings, eye_warnings,
                     tab_warnings, face_warnings)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                 (session["student_name"],
                  session["roll_no"],
                  teacher_name,
@@ -397,7 +389,6 @@ def exam():
                  tab_warnings,
                  face_warnings))
 
-        conn.commit()
         conn.close()
 
         return render_template("result.html",
