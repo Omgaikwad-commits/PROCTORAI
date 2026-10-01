@@ -1,93 +1,134 @@
 from flask import Flask, render_template, request, redirect, session
 import os
+import urllib.parse
 import pymysql
+from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 
+# Load environment variables from .env file if available
+load_dotenv()
+
 app = Flask(__name__)
-app.secret_key = "secretkey"
+app.secret_key = os.environ.get("SECRET_KEY", "exam-proctoring-default-dev-secret-key")
 
 # ================= DATABASE CONFIGURATION =================
-DB_HOST = os.environ.get("DB_HOST", "localhost")
-DB_USER = os.environ.get("DB_USER", "root")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "root123")
-DB_NAME = os.environ.get("DB_NAME", "exam_proctoring")
-DB_PORT = int(os.environ.get("DB_PORT", 3306))
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if DATABASE_URL:
+    parsed = urllib.parse.urlparse(DATABASE_URL)
+    DB_HOST = parsed.hostname or "localhost"
+    DB_USER = parsed.username or "root"
+    DB_PASSWORD = parsed.password or ""
+    DB_NAME = parsed.path.lstrip("/") if parsed.path else "exam_proctoring"
+    DB_PORT = parsed.port or 3306
+else:
+    DB_HOST = os.environ.get("DB_HOST", "localhost")
+    DB_USER = os.environ.get("DB_USER", "root")
+    DB_PASSWORD = os.environ.get("DB_PASSWORD", "root123")
+    DB_NAME = os.environ.get("DB_NAME", "exam_proctoring")
+    DB_PORT = int(os.environ.get("DB_PORT", 3306))
+
+DB_SSL = os.environ.get("DB_SSL", "false").lower() in ("true", "1", "yes")
 
 def get_db():
-    return pymysql.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        database=DB_NAME,
-        port=DB_PORT,
-        autocommit=True
-    )
+    conn_kwargs = {
+        "host": DB_HOST,
+        "user": DB_USER,
+        "password": DB_PASSWORD,
+        "database": DB_NAME,
+        "port": DB_PORT,
+        "autocommit": True,
+        "charset": "utf8mb4",
+        "connect_timeout": 10
+    }
+    if DB_SSL:
+        conn_kwargs["ssl"] = {"ssl_mode": "REQUIRED"}
+    return pymysql.connect(**conn_kwargs)
 
 def init_db():
-    # Ensure MySQL database exists
+    # Ensure MySQL database exists (useful for local and new deployments)
     try:
-        server_conn = pymysql.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            port=DB_PORT,
-            autocommit=True
-        )
+        server_conn_kwargs = {
+            "host": DB_HOST,
+            "user": DB_USER,
+            "password": DB_PASSWORD,
+            "port": DB_PORT,
+            "autocommit": True,
+            "connect_timeout": 10
+        }
+        if DB_SSL:
+            server_conn_kwargs["ssl"] = {"ssl_mode": "REQUIRED"}
+        server_conn = pymysql.connect(**server_conn_kwargs)
         with server_conn.cursor() as s_cursor:
             s_cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{DB_NAME}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
         server_conn.close()
     except Exception as e:
-        print(f"Database check warning: {e}")
+        print(f"Database check warning (may already exist or managed user): {e}")
 
-    conn = get_db()
-    with conn.cursor() as c:
-        c.execute('''CREATE TABLE IF NOT EXISTS teachers(
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        name VARCHAR(100) UNIQUE,
-                        subject VARCHAR(100),
-                        department VARCHAR(100) DEFAULT '',
-                        password VARCHAR(255)
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
+    try:
+        conn = get_db()
+        with conn.cursor() as c:
+            c.execute('''CREATE TABLE IF NOT EXISTS teachers(
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            name VARCHAR(100) UNIQUE,
+                            subject VARCHAR(100),
+                            department VARCHAR(100) DEFAULT '',
+                            password VARCHAR(255)
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS students(
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        name VARCHAR(100),
-                        roll_no VARCHAR(50) UNIQUE,
-                        department VARCHAR(100) DEFAULT '',
-                        class VARCHAR(50) DEFAULT '',
-                        password VARCHAR(255)
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
+            c.execute('''CREATE TABLE IF NOT EXISTS students(
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            name VARCHAR(100),
+                            roll_no VARCHAR(50) UNIQUE,
+                            department VARCHAR(100) DEFAULT '',
+                            class VARCHAR(50) DEFAULT '',
+                            password VARCHAR(255)
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS exams(
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        teacher_name VARCHAR(100),
-                        subject VARCHAR(100),
-                        question TEXT,
-                        option1 TEXT,
-                        option2 TEXT,
-                        option3 TEXT,
-                        option4 TEXT,
-                        answer TEXT
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
+            c.execute('''CREATE TABLE IF NOT EXISTS exams(
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            teacher_name VARCHAR(100),
+                            subject VARCHAR(100),
+                            question TEXT,
+                            option1 TEXT,
+                            option2 TEXT,
+                            option3 TEXT,
+                            option4 TEXT,
+                            answer TEXT
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS results(
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        student_name VARCHAR(100),
-                        roll_no VARCHAR(50),
-                        teacher_name VARCHAR(100),
-                        subject VARCHAR(100),
-                        department VARCHAR(100) DEFAULT '',
-                        score INT DEFAULT 0,
-                        warnings INT DEFAULT 0,
-                        mobile_warnings INT DEFAULT 0,
-                        eye_warnings INT DEFAULT 0,
-                        tab_warnings INT DEFAULT 0,
-                        face_warnings INT DEFAULT 0
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
+            c.execute('''CREATE TABLE IF NOT EXISTS results(
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            student_name VARCHAR(100),
+                            roll_no VARCHAR(50),
+                            teacher_name VARCHAR(100),
+                            subject VARCHAR(100),
+                            department VARCHAR(100) DEFAULT '',
+                            score INT DEFAULT 0,
+                            warnings INT DEFAULT 0,
+                            mobile_warnings INT DEFAULT 0,
+                            eye_warnings INT DEFAULT 0,
+                            tab_warnings INT DEFAULT 0,
+                            face_warnings INT DEFAULT 0
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
 
-    conn.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error during table initialization: {e}")
 
 init_db()
+
+# ================= HEALTH CHECK =================
+
+@app.route("/health")
+def health():
+    try:
+        conn = get_db()
+        with conn.cursor() as c:
+            c.execute("SELECT 1")
+        conn.close()
+        return {"status": "healthy", "database": "connected"}, 200
+    except Exception as e:
+        return {"status": "unhealthy", "database_error": str(e)}, 500
 
 # ================= HOME =================
 
@@ -406,4 +447,6 @@ def exam():
                            subject=session["exam_subject"])
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    debug_mode = os.environ.get("FLASK_DEBUG", "False").lower() in ("true", "1")
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=debug_mode)
